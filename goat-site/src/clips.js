@@ -13,7 +13,8 @@ const PARALLEL = 8;
 // Only a few frames of a clip are kept decoded at once: all of them together are over a gigabyte of pixels,
 // which a phone cannot hold (the tab is killed). The ones near the current frame stay; the browser's own cache
 // keeps the files, so a frame that was dropped comes back quickly.
-const KEEP = matchMedia("(max-width: 820px)").matches ? 4 : 10;
+const LITE = matchMedia("(max-width: 820px)").matches;
+const KEEP = LITE ? 6 : 10;
 function makeFrames(meta, keepAll = false) {
   const images = new Array(meta.n);
   const listeners = new Set();
@@ -32,7 +33,7 @@ function makeFrames(meta, keepAll = false) {
     const entry = { img, ok: false };
     entry.done = new Promise((resolve) => {
       img.onload = () => { entry.ok = true; evict(); listeners.forEach((f) => f(i)); resolve(true); };
-      img.onerror = () => resolve(false);
+      img.onerror = () => { resolve(false); setTimeout(() => { if (images[i] === entry) images[i] = undefined; }, 700); }; // a frame the host refused is asked for again, not given up on
     });
     images[i] = entry;
     img.src = meta.frames[i];
@@ -44,7 +45,7 @@ function makeFrames(meta, keepAll = false) {
     best(i) {
       cur = i;
       load(i);
-      if (!keepAll) for (const d of [1, 2, 3, -1]) if (i + d >= 0 && i + d < meta.n) load(i + d);
+      if (!keepAll) for (const d of LITE ? [1, 2] : [1, 2, 3, -1]) if (i + d >= 0 && i + d < meta.n) load(i + d);
       if (images[i]?.ok) return images[i].img;
       for (let k = i - 1; k >= 0; k--) if (images[k]?.ok) return images[k].img;
       for (let k = i + 1; k < meta.n; k++) if (images[k]?.ok) return images[k].img;
