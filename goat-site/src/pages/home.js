@@ -21,7 +21,7 @@ mount(body, async () => {
   const sec = (label, ...kids) => h("section", { class: "sec" }, vlabel(label), h("div", null, ...kids));
   return h("div", null,
     sec(t("goatBig", "goat"), h("h2", { class: "h2" }, t("dares", "for who dares")), h("p", { class: "p" }, t("daresP", ""))),
-    h("ul", { class: "pics", "aria-hidden": "true" }, circle("leapA", 0.5), circle("leapB", 0.5), circle("eye", 1)),
+    h("ul", { class: "pics", "aria-hidden": "true" }, circle("can2", 0), circle("eye", 1)),
     sec(`${t("creative", "creative")} ${t("ideas", "ideas")}`, h("h2", { class: "h2" }, t("smash", "smash the records")), h("p", { class: "p" }, t("p1", "")), h("p", { class: "p" }, t("p2", ""))),
     counters && sec(t("ui.about.numbers", "numbers"), h("ul", { class: "stats" }, [["Prject", "projects"], ["client", "clients"], ["staff", "staff"], ["years", "years"]]
       .map(([k, cap]) => h("li", null, h("span", { class: "num" }, String(counters[k])), h("span", { class: "cap" }, t(`ui.stat.${cap}`, cap)))))),
