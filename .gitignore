@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.log
+.env
+.claude/
+graphify-out/
+# tools used while building the site, not part of it
+tools/
+goat-site/cmp/
+goat-site/bake_tmp/
+# the contact messages people sent: personal data, never committed
+backend/data/messages.json
+# upload leftovers
+backend/tmp_t/

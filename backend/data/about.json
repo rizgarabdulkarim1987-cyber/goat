@@ -1,0 +1,17 @@
+{
+  "title": "about",
+  "headline": "we do the firsts",
+  "intro": "at GOAT, we’ve always aimed to deliver services that stand out with top-notch quality. By quality, we mean obsessing over the smallest details and embracing new methods and technologies to bring creative and innovative ideas to life—even for the tiniest projects.",
+  "sections": [
+    { "label": "who", "title": "for who dares", "text": "GOAT is a creative agency for brands that would rather lead than follow. We work with founders, marketing teams and cultural institutions who want an idea nobody has tried yet, and the craft to make it real." },
+    { "label": "how", "title": "lines, shapes, colors", "text": "Every project starts with a drawing: a few lines, the shapes they make and the colors that wake them up. We keep the process small and close, so the person who sketched the idea is the person who ships it." },
+    { "label": "why", "title": "bring ideas to life", "text": "From a single poster to a complete identity, we plant the idea, water it with research and let it grow into something the whole team is proud to put its name on." }
+  ],
+  "values": ["smallest details", "new methods", "creative ideas", "no tiny projects"],
+  "team": [
+    { "name": "Rizgar", "role": "founder, creative direction" },
+    { "name": "Lana", "role": "design lead" },
+    { "name": "Aras", "role": "motion and 3D" },
+    { "name": "Shno", "role": "strategy and copy" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "goat-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API for the goat site: circle frame sequences, end counters, work, blog, about and contact",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "2.8.5",
+    "express": "4.21.2",
+    "ffmpeg-static": "^5.2.0",
+    "multer": "^1.4.5-lts.1"
+  }
+}

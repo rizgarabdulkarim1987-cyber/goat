@@ -1,0 +1,107 @@
+@font-face { font-family: "Moranga"; font-weight: 300; src: url("/fonts/moranga-light.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Moranga"; font-weight: 400; src: url("/fonts/moranga-regular.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Moranga"; font-weight: 500; src: url("/fonts/moranga-medium.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Moranga"; font-weight: 700; src: url("/fonts/moranga-bold.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Moranga"; font-weight: 900; src: url("/fonts/moranga-black.woff2") format("woff2"); font-display: block; }
+
+:root {
+  --bg: #ffffff;
+  --ink: #000000;
+  --red: #ea1a0c;
+}
+
+/* The whole page is one 1438 x 960 design canvas, scaled to fit the window
+   (--s is set from JS), so every position matches the reference at any size. */
+#design { position: absolute; left: 50%; top: 50%; width: 1438px; height: 960px; --u: 1px; --s: 1;
+  background: var(--bg); overflow: hidden;
+  transform: translate(-50%, -50%) scale(var(--s)); transform-origin: center; }
+#layer-a svg, #layer-lines svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.outline { color: transparent; -webkit-text-stroke: 2px #2c2c2c; }
+/* baked video clips: one sprite sheet, frame picked by background-position */
+.clip { position: absolute; left: 0; top: 0; background-repeat: no-repeat; will-change: transform, opacity; }
+.clip.round { border-radius: 50%; }
+.slot { position: absolute; left: 0; top: 0; overflow: hidden; will-change: transform; }
+.slot .col div { font-weight: 900; color: #fff; line-height: 1; }
+html { scrollbar-width: none; } html::-webkit-scrollbar { display: none; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #000; }
+body { font-family: "Moranga", Georgia, serif; font-weight: 400; color: var(--ink); overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+#scroll-space { width: 1px; }
+#stage { position: fixed; inset: 0; overflow: hidden; background: var(--bg); }
+.layer { position: absolute; inset: 0; pointer-events: none; }
+/* every positioned thing uses design units */
+.el { position: absolute; left: 0; top: 0; white-space: nowrap; line-height: 1; will-change: transform, opacity; }
+.el.wrap { white-space: normal; }
+.el.wrap { white-space: normal; }
+.circle-img { position: absolute; left: 0; top: 0; border-radius: 50%; overflow: hidden; background-size: cover; background-position: center; will-change: transform, opacity; }
+.circle-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ring { position: absolute; left: 0; top: 0; border-radius: 50%; border: 1px solid currentColor; will-change: transform, opacity; }
+.dot { position: absolute; left: 0; top: 0; border-radius: 50%; background: #000; will-change: transform, opacity; }
+
+.big { font-weight: 900; letter-spacing: -0.01em; }
+/* hero letters show the photo from the reference frame through the glyphs:
+   the texture is the whole 1438x960 canvas, positioned so it lines up with the page */
+.textfill {
+  --bgx: 0px; --bgy: 0px;
+  width: 1000px; height: 300px; line-height: 300px !important; text-align: center;
+  background-color: #000;
+  background-image: var(--fill);
+  background-size: 1438px 960px;
+  background-repeat: no-repeat;
+  background-position: var(--bgx) var(--bgy);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* domes (curved section wipes) */
+.dome { position: absolute; left: 0; top: 0; will-change: transform; }
+
+/* fixed UI */
+#ui { position: absolute; inset: 0; color: #fff; mix-blend-mode: difference; pointer-events: none; z-index: 50; }
+#ui a { pointer-events: auto; }
+.logo { position: absolute; left: calc(64 * var(--u)); top: calc(32 * var(--u)); display: block; width: calc(31 * var(--u)); }
+.logo img { display: block; width: 100%; }
+/* vertical lock-up: circle on top, wordmark rotated 90deg clockwise below it */
+.logo-text-wrap { position: relative; display: block; width: calc(28 * var(--u)); height: calc(43.5 * var(--u)); margin: calc(6 * var(--u)) 0 0 calc(1.5 * var(--u)); }
+.logo-text-wrap .logo-text { position: absolute; left: 0; top: 0; width: calc(43.5 * var(--u)); height: calc(28 * var(--u)); transform-origin: 0 0; transform: translateX(calc(28 * var(--u))) rotate(90deg); }
+.nav-main, .nav-bottom { position: absolute; left: calc(64 * var(--u)); display: flex; flex-direction: column; font-size: calc(15.5 * var(--u)); font-weight: 300; }
+.nav-main { top: calc(402 * var(--u)); } .nav-main a { height: calc(32 * var(--u)); line-height: calc(26 * var(--u)); }
+.nav-bottom { top: calc(852 * var(--u)); } .nav-bottom a { height: calc(32 * var(--u)); line-height: calc(26 * var(--u)); }
+.social { position: absolute; left: calc(1352 * var(--u)); top: calc(458 * var(--u)); font-size: calc(15 * var(--u)); writing-mode: vertical-rl; }
+
+/* control panel */
+#panel { position: fixed; right: 16px; bottom: 16px; z-index: 100; font: 13px/1.4 system-ui, sans-serif; color: #fff; }
+#panel button.toggle { background: #111; color: #fff; border: 1px solid #444; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+#panel .body { display: none; width: 300px; max-height: 70vh; overflow: auto; margin-bottom: 8px; background: rgba(17,17,17,.96); border: 1px solid #333; border-radius: 12px; padding: 14px; }
+#panel.open .body { display: block; }
+#panel h4 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #999; margin: 12px 0 6px; font-weight: 600; }
+#panel h4:first-child { margin-top: 0; }
+#panel label { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin: 6px 0; }
+#panel input[type=range] { width: 100%; grid-column: 1 / -1; }
+#panel input[type=text] { width: 100%; grid-column: 1 / -1; background: #000; color: #fff; border: 1px solid #333; border-radius: 6px; padding: 6px 8px; }
+#panel input[type=color] { width: 36px; height: 24px; border: 0; background: none; }
+#panel .imgrow { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+#panel .imgrow img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid #333; }
+#panel .imgrow span { flex: 1; }
+#panel .imgrow label.btn { display: inline-block; background: #222; border: 1px solid #444; border-radius: 6px; padding: 4px 8px; cursor: pointer; margin: 0; }
+#panel .imgrow input { display: none; }
+#panel .reset { margin-top: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+
+/* language switch: top right of the fixed column, in every language */
+.langs { position: absolute; left: calc(1296 * var(--u)); top: calc(32 * var(--u)); display: flex; gap: calc(14 * var(--u)); direction: ltr; font-size: calc(15 * var(--u)); }
+.langs button { font: inherit; font-weight: 300; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; opacity: .55; pointer-events: auto; transition: opacity .2s; }
+.langs button:hover, .langs button[aria-current] { opacity: 1; }
+.langs button[aria-current] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+.langs button:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+
+/* Arabic and Kurdish: a font with the letters, joined (no letter-spacing, no case), and room for tall glyphs */
+html[data-lang="ar"] body, html[data-lang="ckb"] body,
+html[data-lang="ar"] button, html[data-lang="ckb"] button, html[data-lang="ar"] input, html[data-lang="ckb"] input,
+html[data-lang="ar"] textarea, html[data-lang="ckb"] textarea, html[data-lang="ar"] select, html[data-lang="ckb"] select {
+  font-family: "Moranga", "Noto Sans Arabic", Tahoma, "Segoe UI", Arial, sans-serif;
+}
+html[data-lang="ar"] *, html[data-lang="ckb"] * { letter-spacing: 0 !important; text-transform: none !important; }
+html[data-lang="ar"] .el, html[data-lang="ckb"] .el { line-height: 1.3; }
+html[data-lang="ar"] .langs button, html[data-lang="ckb"] .langs button { font-family: "Moranga", "Noto Sans Arabic", Tahoma, sans-serif; }
