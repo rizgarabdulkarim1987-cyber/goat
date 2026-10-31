@@ -489,7 +489,6 @@ track(blackExit, [[42.5, 1022], [42.75, 1012], [43.0, 985], [43.25, 968], [43.5,
   [48.0, 790], [48.25, 540], [48.5, 373], [48.75, 258], [49.0, 177], [49.25, 117], [49.5, 73], [49.75, 20], [50.0, -20], [50.3, -120], [50.6, -400], [51.4, -2600]]
   .map(([t, yb]) => [t, 0, yb - 1400]));
 // the nav leaves with the plant scene (on a phone the two icons stay: they are the only way to the other pages)
-if (!matchMedia("(max-width: 820px)").matches) tl.to("#ui", { opacity: 0, duration: 0.5 }, 42.8);
 
 /* ================================================================== *
  * SCENE F — our dream (white)
