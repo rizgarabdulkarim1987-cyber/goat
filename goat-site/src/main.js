@@ -7,6 +7,8 @@ import { loadSeq, loadCounters, loadContent } from "./clips.js";
 import { rtl, t, langSwitch } from "./lang.js";
 
 gsap.registerPlugin(ScrollTrigger);
+// phones: no forced 3D layers; the big black wipes would each get a layer of tens of megapixels, which an iPhone kills the page for
+if (matchMedia("(max-width: 820px)").matches) gsap.config({ force3D: false });
 
 // ?cmp=1&t=N: frame-capture mode for compare.py — no scrolling, no smoothing, no panel
 const params = new URLSearchParams(location.search);
