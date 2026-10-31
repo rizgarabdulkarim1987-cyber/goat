@@ -13,7 +13,7 @@ const PARALLEL = 8;
 // Only a few frames of a clip are kept decoded at once: all of them together are over a gigabyte of pixels,
 // which a phone cannot hold (the tab is killed). The ones near the current frame stay; the browser's own cache
 // keeps the files, so a frame that was dropped comes back quickly.
-const KEEP = 10;
+const KEEP = matchMedia("(max-width: 820px)").matches ? 4 : 10;
 function makeFrames(meta, keepAll = false) {
   const images = new Array(meta.n);
   const listeners = new Set();

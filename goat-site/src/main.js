@@ -131,7 +131,8 @@ function clip(name, o = {}) {
   if (m.frameSet) {
     // frames served one by one by the backend: drawn on a canvas, so a frame swap never flickers
     const cv = document.createElement("canvas");
-    cv.width = m.cell[0]; cv.height = m.cell[1];
+    const lite = matchMedia("(max-width: 820px)").matches ? 0.5 : 1; // a phone gets half-size canvases: a quarter of the memory
+    cv.width = Math.round(m.cell[0] * lite); cv.height = Math.round(m.cell[1] * lite);
     cv.style.cssText = "display:block;width:100%;height:100%";
     el.style.overflow = "hidden";
     el.appendChild(cv);
