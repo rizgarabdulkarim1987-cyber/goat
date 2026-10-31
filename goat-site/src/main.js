@@ -128,7 +128,7 @@ function clip(name, o = {}) {
     const g = cv.getContext("2d");
     g.imageSmoothingQuality = "high";
     let shown = null;
-    draw = (i) => { const img = m.frameSet.best(i); if (img && img !== shown) { g.drawImage(img, 0, 0, cv.width, cv.height); shown = img; } };
+    draw = (i) => { const img = m.frameSet.best(i); if (img && img !== shown) { g.clearRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height); shown = img; } };
     m.frameSet.onLoad((i) => { if (i === Math.round(st.f)) paint(); });
   } else {
     Object.assign(el.style, { backgroundImage: `url(${m.src})`, backgroundSize: `${m.cols * m.w}px ${m.rows * m.h}px` });
@@ -543,7 +543,7 @@ const can = () => {
   const g = cv.getContext("2d");
   g.imageSmoothingQuality = "high";
   let shown = null, cur = 0;
-  const paint = () => { const img = m.frameSet.best(cur); if (img && img !== shown) { g.drawImage(img, 0, 0, cv.width, cv.height); shown = img; } };
+  const paint = () => { const img = m.frameSet.best(cur); if (img && img !== shown) { g.clearRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height); shown = img; } };
   m.frameSet.onLoad((i) => { if (i === cur) paint(); });
   paint();
   if (m.n > 1) {
