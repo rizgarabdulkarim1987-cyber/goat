@@ -46,12 +46,15 @@ const layers = {
 };
 
 const design = document.getElementById("design");
+// Wide windows show the whole canvas. On a tablet or phone the window is narrower than the scene, so the scene is
+// enlarged until about VIEW_W design px of its width are in view (never beyond filling the window): the middle of the
+// scene stays readable, and the colour carries on above and below where the window is taller than the canvas.
+const VIEW_W = 780;
 function fit() {
-  const s = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H), root = document.documentElement.style;
+  const fitS = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H), cover = Math.max(innerWidth / DESIGN_W, innerHeight / DESIGN_H);
+  const s = innerWidth >= 1100 ? fitS : Math.max(fitS, Math.min(cover, innerWidth / VIEW_W));
   design.style.setProperty("--s", s);
-  // how much of the window lies beyond the canvas: the column and the labels are placed at the window's edges
-  root.setProperty("--ex", `${Math.max(0, (innerWidth / s - DESIGN_W) / 2)}px`);
-  root.setProperty("--ey", `${Math.max(0, (innerHeight / s - DESIGN_H) / 2)}px`);
+  document.documentElement.style.setProperty("--s", s); // the header is sized from it
 }
 fit();
 addEventListener("resize", fit);
@@ -273,7 +276,8 @@ const domeBlack = cover("top", 560);
 tl.set(domeBlack, { opacity: 1 }, 6.85);
 // crest height per 0.1s, measured on the reference frames
 track(domeBlack, [[6.85, 0, 960], [6.9, 0, 855], [7.0, 0, 762], [7.1, 0, 661], [7.2, 0, 561], [7.3, 0, 431], [7.4, 0, 381],
-  [7.5, 0, 304], [7.6, 0, 235], [7.7, 0, 174], [7.8, 0, 122], [7.9, 0, 76], [8.0, 0, 38], [8.2, 0, -10], [8.4, 0, -120]]);
+  [7.5, 0, 304], [7.6, 0, 235], [7.7, 0, 174], [7.8, 0, 122], [7.9, 0, 76], [8.0, 0, 38], [8.2, 0, -10], [8.4, 0, -120],
+  [9.0, 0, -1000]]); // the last key only lifts the arc out of sight, for windows taller than the canvas (phones)
 
 /* ================================================================== *
  * SCENE B — leap / runner (black)

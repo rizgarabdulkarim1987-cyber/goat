@@ -16,7 +16,7 @@
   background: var(--bg);
   /* on a wide window the scene carries on to the sides instead of leaving bars: the colour is extended with a shadow,
      the black wipes are wider than the canvas, and only the top and bottom edges clip */
-  clip-path: inset(0 -3000px); box-shadow: -3000px 0 0 var(--bg), 3000px 0 0 var(--bg);
+  clip-path: inset(-3000px); box-shadow: 0 0 0 3000px var(--bg);
   transform: translate(-50%, -50%) scale(var(--s)); transform-origin: center; }
 #layer-a svg, #layer-lines svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .outline { color: transparent; -webkit-text-stroke: 2px #2c2c2c; }
@@ -98,6 +98,17 @@ a { color: inherit; text-decoration: none; }
 
 /* language switch: top right of the fixed column, in every language */
 .langs { position: absolute; right: calc(30 * var(--u)); top: calc(32 * var(--u)); display: flex; gap: calc(14 * var(--u)); direction: ltr; font-size: calc(15 * var(--u)); }
+/* on the home page the header is a sibling of the canvas: laid out in window pixels, one design px = --s window px */
+#stage > #ui { left: 0; top: 0; width: auto; height: auto; right: 0; bottom: 0; --u: calc(var(--s, 1) * 1px); }
+
+/* tablets and phones: the column becomes a bar across the top (same as the inner pages) */
+@media (max-width: 820px) {
+  #stage > #ui { --u: 1px; bottom: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 16px; padding: 12px 16px; }
+  #stage > #ui .logo, #stage > #ui .nav-main, #stage > #ui .nav-bottom, #stage > #ui .social, #stage > #ui .langs { position: static; display: flex; flex-direction: row; gap: 14px; font-size: 15px; writing-mode: horizontal-tb; width: auto; }
+  #stage > #ui .logo { width: 24px; } #stage > #ui .logo-text-wrap { display: none; }
+  #stage > #ui .nav-main a, #stage > #ui .nav-bottom a { height: auto; line-height: 1.5; padding: 4px 0; }
+  #stage > #ui .langs { margin-inline-start: auto; }
+}
 .langs button { font: inherit; font-weight: 300; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; opacity: .55; pointer-events: auto; transition: opacity .2s; }
 .langs button:hover, .langs button[aria-current] { opacity: 1; }
 .langs button[aria-current] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
