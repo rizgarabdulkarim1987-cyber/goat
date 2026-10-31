@@ -85,8 +85,6 @@ export function mountShell(page, { theme = "dark", title } = {}) {
       h("span", { class: "logo-text-wrap" }, h("img", { class: "logo-text", src: "/img/logo-text.svg", alt: "" }))),
     langBtn, menuBtn,
     h("nav", { class: "nav-main", "aria-label": "main" }, MAIN.map(link)),
-    h("nav", { class: "nav-bottom", "aria-label": "more" }, BOTTOM.map(link)),
-    h("a", { class: "social", href: "/social.html", "aria-current": page === "social" ? "page" : null }, t("nav.social", "social")),
     langSwitch()));
   const langs = ui.querySelector(".langs");
   const setOpen = (el, btn, on) => { el.classList.toggle("open", on); btn.setAttribute("aria-expanded", String(on)); };
