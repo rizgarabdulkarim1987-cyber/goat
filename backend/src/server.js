@@ -191,7 +191,13 @@ app.get("/api/messages", admin, wrap(async (req, res) => res.json(await readJson
 mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin, LANGS, langOf });
 
 app.use("/api", (req, res) => res.status(404).json({ error: "not found" }));
-app.use(express.static(SITE, { maxAge: "1h", extensions: ["html"] }));
+// pages are always re-checked (a new deploy changes which scripts they load); the hashed files under /assets never change
+app.use(express.static(SITE, {
+  extensions: ["html"],
+  setHeaders(res, file) {
+    res.setHeader("Cache-Control", /[\/]assets[\/]/.test(file) ? "public, max-age=31536000, immutable" : /\.(html)$/.test(file) ? "no-cache" : "public, max-age=3600");
+  },
+}));
 app.use((err, req, res, next) => {
   if (err.type === "entity.parse.failed") return res.status(400).json({ error: "bad json" });
   console.error(err);
