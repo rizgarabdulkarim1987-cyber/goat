@@ -102,6 +102,8 @@
     "stat.Prject": "مشاريع",
     "stat.client": "عملاء",
     "stat.staff": "فريق",
-    "stat.years": "سنوات"
+    "stat.years": "سنوات",
+    "ui.menu": "القائمة",
+    "ui.language": "اللغة"
   }
 }

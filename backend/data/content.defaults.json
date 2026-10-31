@@ -102,6 +102,8 @@
     "ui.st.downText": "start it with npm start inside the backend folder, then try again.",
     "ui.st.retry": "try again",
     "ui.st.nf": "not found",
-    "ui.st.nfText": "this page does not exist."
+    "ui.st.nfText": "this page does not exist.",
+    "ui.menu": "menu",
+    "ui.language": "language"
   }
 }

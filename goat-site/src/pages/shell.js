@@ -60,7 +60,7 @@ function reveal(root) {
 }
 
 // the picture that sits in the page's circle: one frame of a circle clip, or the can picture
-const ART = { about: ["eye", 1], work: [["can2", 0], ["can3", 0], ["can1", 0]], contact: ["plant", 0.5], blog: ["leapA", 0.5], music: ["cheer", 0.5], search: ["eye", 1], social: ["leapB", 0.5] };
+const ART = { home: ["eye", 1], about: ["eye", 1], work: [["can2", 0], ["can3", 0], ["can1", 0]], contact: ["plant", 0.5], blog: ["leapA", 0.5], music: ["cheer", 0.5], search: ["eye", 1], social: ["leapB", 0.5] };
 async function orbPicture(spec) {
   const c = await api(`/api/clips/${spec[0]}`);
   return c.frames?.[Math.min(c.n - 1, Math.floor(c.n * spec[1]))];
@@ -75,14 +75,25 @@ export function mountShell(page, { theme = "dark", title } = {}) {
   document.body.dataset.page = page;
   document.title = `${title || t(`nav.${page}`, page)} — goat creative agency`;
   const link = ([name, href]) => h("a", { href, "aria-current": name === page ? "page" : null }, t(`nav.${name}`, name));
+  // on a phone the language switch and the links hide behind two icons
+  const iconBtn = (cls, label, svg) => { const b = h("button", { type: "button", class: `icon-btn ${cls}`, "aria-label": label, "aria-expanded": "false" }); b.innerHTML = svg; return b; };
+  const langBtn = iconBtn("lang-btn", t("ui.language", "language"), '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c3 3 3 16 0 19M12 2.5c-3 3-3 16 0 19"/></svg>');
+  const menuBtn = iconBtn("menu-btn", t("ui.menu", "menu"), '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path class="m1" d="M4 8h16"/><path class="m2" d="M4 16h16"/></svg>');
   const ui = h("div", { id: "frame" }, h("header", { id: "ui" },
     h("a", { class: "logo", href: "/", "aria-label": "goat creative agency, home" },
       h("img", { class: "logo-circle", src: "/img/logo-circle.svg", alt: "" }),
       h("span", { class: "logo-text-wrap" }, h("img", { class: "logo-text", src: "/img/logo-text.svg", alt: "" }))),
+    langBtn, menuBtn,
     h("nav", { class: "nav-main", "aria-label": "main" }, MAIN.map(link)),
     h("nav", { class: "nav-bottom", "aria-label": "more" }, BOTTOM.map(link)),
     h("a", { class: "social", href: "/social.html", "aria-current": page === "social" ? "page" : null }, t("nav.social", "social")),
     langSwitch()));
+  const langs = ui.querySelector(".langs");
+  const setOpen = (el, btn, on) => { el.classList.toggle("open", on); btn.setAttribute("aria-expanded", String(on)); };
+  menuBtn.addEventListener("click", () => { setOpen(ui, menuBtn, !ui.classList.contains("open")); setOpen(langs, langBtn, false); document.body.classList.toggle("menu-open", ui.classList.contains("open")); });
+  langBtn.addEventListener("click", (e) => { e.stopPropagation(); setOpen(langs, langBtn, !langs.classList.contains("open")); });
+  addEventListener("click", () => setOpen(langs, langBtn, false));
+  addEventListener("keydown", (e) => { if (e.key === "Escape") { setOpen(langs, langBtn, false); setOpen(ui, menuBtn, false); document.body.classList.remove("menu-open"); } });
   // the fixed column stays on the left in every language; only the page itself reads right to left
   const main = h("main", { id: "page", dir: rtl ? "rtl" : "ltr", lang });
   document.body.replaceChildren(swoosh(), ui, main);
