@@ -137,7 +137,7 @@ button.chip { cursor: pointer; }
   /* the links and the language switch hide behind two icons */
   .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; background: none; border: 0; color: inherit; cursor: pointer; border-radius: 50%; }
   .icon-btn:focus-visible { outline: 1px solid currentColor; outline-offset: -4px; }
-  .icon-btn .m1, .icon-btn .m2 { transition: transform .3s cubic-bezier(.2, .7, .2, 1); transform-origin: 12px 12px; }
+  .icon-btn .m1, .icon-btn .m2 { transition: transform .3s cubic-bezier(.2, .7, .2, 1); transform-box: fill-box; transform-origin: center; }
   #frame.open .menu-btn .m1 { transform: translateY(4px) rotate(45deg); }
   #frame.open .menu-btn .m2 { transform: translateY(-4px) rotate(-45deg); }
   .lang-btn { margin-inline-start: auto; }

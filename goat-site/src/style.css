@@ -110,7 +110,7 @@ a { color: inherit; text-decoration: none; }
   #stage > #ui .logo-text-wrap, #stage > #ui .nav-main, #stage > #ui .nav-bottom, #stage > #ui .social, #stage > #ui .langs { display: none; }
   .m-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; background: none; border: 0; color: #fff; cursor: pointer; pointer-events: auto; }
   .m-btn:first-of-type { margin-inline-start: auto; }
-  .m-btn .m1, .m-btn .m2 { transition: transform .3s cubic-bezier(.2, .7, .2, 1); transform-origin: 12px 12px; }
+  .m-btn .m1, .m-btn .m2 { transition: transform .3s cubic-bezier(.2, .7, .2, 1); transform-box: fill-box; transform-origin: center; }
   .m-open .m-menu .m1 { transform: translateY(4px) rotate(45deg); } .m-open .m-menu .m2 { transform: translateY(-4px) rotate(-45deg); }
   #m-sheet, #m-lang { position: absolute; z-index: 60; background: #000; color: #fff; }
   #m-sheet { inset: 0; padding: 76px 22px 40px; overflow-y: auto; flex-direction: column; gap: 8px; }
