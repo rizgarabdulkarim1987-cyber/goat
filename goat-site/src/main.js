@@ -22,6 +22,17 @@ const imageUrl = (id, def) => content?.images?.[id] ?? def;
 // the fixed column: its words and the language switch
 document.querySelectorAll("[data-t]").forEach((a) => { a.textContent = t(a.dataset.t, a.textContent); });
 document.getElementById("lang-slot")?.replaceWith(langSwitch());
+{ // the phone header: the same links and languages, in a sheet opened by the two icons
+  const sheet = document.getElementById("m-sheet"), pop = document.getElementById("m-lang"), root = document.documentElement;
+  document.querySelectorAll(".nav-main a, .nav-bottom a, .social").forEach((a, i) => { const c = a.cloneNode(true); if (i === 5) c.className = "first-of-group"; sheet.append(c); });
+  pop.append(langSwitch());
+  const menu = document.querySelector(".m-menu"), lg = document.querySelector(".m-langbtn");
+  const set = (cls, btn, on) => { root.classList.toggle(cls, on); btn.setAttribute("aria-expanded", String(on)); };
+  menu.addEventListener("click", () => { set("m-open", menu, !root.classList.contains("m-open")); set("m-lang-open", lg, false); });
+  lg.addEventListener("click", (e) => { e.stopPropagation(); set("m-lang-open", lg, !root.classList.contains("m-lang-open")); set("m-open", menu, false); });
+  addEventListener("click", () => set("m-lang-open", lg, false));
+  addEventListener("keydown", (e) => { if (e.key === "Escape") { set("m-open", menu, false); set("m-lang-open", lg, false); } });
+}
 document.querySelector(".logo-circle")?.setAttribute("src", imageUrl("logoCircle", "/img/logo-circle.svg"));
 document.querySelector(".logo-text")?.setAttribute("src", imageUrl("logoText", "/img/logo-text.svg"));
 if (CMP) await framesLoaded; // a capture must see every frame
@@ -46,13 +57,9 @@ const layers = {
 };
 
 const design = document.getElementById("design");
-// Wide windows show the whole canvas. On a tablet or phone the window is narrower than the scene, so the scene is
-// enlarged until about VIEW_W design px of its width are in view (never beyond filling the window): the middle of the
-// scene stays readable, and the colour carries on above and below where the window is taller than the canvas.
-const VIEW_W = 780;
+// The whole canvas is always in view (phones show it small, with the scene's colour carrying on above and below).
 function fit() {
-  const fitS = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H), cover = Math.max(innerWidth / DESIGN_W, innerHeight / DESIGN_H);
-  const s = innerWidth >= 1100 ? fitS : Math.max(fitS, Math.min(cover, innerWidth / VIEW_W));
+  const s = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H);
   design.style.setProperty("--s", s);
   document.documentElement.style.setProperty("--s", s); // the header is sized from it
 }
@@ -277,7 +284,7 @@ tl.set(domeBlack, { opacity: 1 }, 6.85);
 // crest height per 0.1s, measured on the reference frames
 track(domeBlack, [[6.85, 0, 960], [6.9, 0, 855], [7.0, 0, 762], [7.1, 0, 661], [7.2, 0, 561], [7.3, 0, 431], [7.4, 0, 381],
   [7.5, 0, 304], [7.6, 0, 235], [7.7, 0, 174], [7.8, 0, 122], [7.9, 0, 76], [8.0, 0, 38], [8.2, 0, -10], [8.4, 0, -120],
-  [9.0, 0, -1000]]); // the last key only lifts the arc out of sight, for windows taller than the canvas (phones)
+  [9.4, 0, -1600]]); // the last key only lifts the arc out of sight, for windows taller than the canvas (phones)
 
 /* ================================================================== *
  * SCENE B — leap / runner (black)
@@ -471,9 +478,10 @@ const blackExit = cover("bottom", 457);
 tl.set(blackExit, { opacity: 1 }, 42.5);
 tl.set(domeBlack, { opacity: 0 }, 42.51);
 track(blackExit, [[42.5, 1022], [42.75, 1012], [43.0, 985], [43.25, 968], [43.5, 959], [43.75, 957], [47.5, 957], [47.75, 953],
-  [48.0, 790], [48.25, 540], [48.5, 373], [48.75, 258], [49.0, 177], [49.25, 117], [49.5, 73], [49.75, 20], [50.0, -20], [50.3, -120], [50.6, -400]]
+  [48.0, 790], [48.25, 540], [48.5, 373], [48.75, 258], [49.0, 177], [49.25, 117], [49.5, 73], [49.75, 20], [50.0, -20], [50.3, -120], [50.6, -400], [51.4, -2600]]
   .map(([t, yb]) => [t, 0, yb - 1400]));
-tl.to("#ui", { opacity: 0, duration: 0.5 }, 42.8); // the nav leaves with the plant scene
+// the nav leaves with the plant scene (on a phone the two icons stay: they are the only way to the other pages)
+if (!matchMedia("(max-width: 820px)").matches) tl.to("#ui", { opacity: 0, duration: 0.5 }, 42.8);
 
 /* ================================================================== *
  * SCENE F — our dream (white)

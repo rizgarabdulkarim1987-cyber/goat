@@ -294,9 +294,3 @@ body[data-page="social"] .link a:hover .t { color: #000; }
 @media (prefers-reduced-motion: reduce) {
   body[data-page="music"] .orb::before, body[data-page="music"] .orb::after { animation: none; }
 }
-
-/* home page on phones and narrow tablets */
-body[data-page="home"] .pics { list-style: none; display: flex; justify-content: center; gap: clamp(8px, 3vw, 20px); margin: clamp(24px, 6vw, 48px) auto; padding: 0 16px; }
-body[data-page="home"] .dot-pic { flex: 1 1 0; max-width: 220px; aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #111; border: 1px solid var(--line, #333); }
-body[data-page="home"] .dot-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
-body[data-page="home"] .sec .btn { display: inline-block; margin-top: 18px; }
