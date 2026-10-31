@@ -46,7 +46,13 @@ const layers = {
 };
 
 const design = document.getElementById("design");
-function fit() { design.style.setProperty("--s", Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H)); }
+function fit() {
+  const s = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H), root = document.documentElement.style;
+  design.style.setProperty("--s", s);
+  // how much of the window lies beyond the canvas: the column and the labels are placed at the window's edges
+  root.setProperty("--ex", `${Math.max(0, (innerWidth / s - DESIGN_W) / 2)}px`);
+  root.setProperty("--ey", `${Math.max(0, (innerHeight / s - DESIGN_H) / 2)}px`);
+}
 fit();
 addEventListener("resize", fit);
 
@@ -177,6 +183,15 @@ function cover(side, b) {
   const w = 2800, h = side === "top" ? 6000 : 1400;
   Object.assign(el.style, { width: `${w}px`, height: `${h}px`, left: `${(DESIGN_W - w) / 2}px`, top: 0, background: "#000" });
   el.style.borderRadius = side === "top" ? `${w / 2}px ${w / 2}px 0 0 / ${b}px ${b}px 0 0` : `0 0 ${w / 2}px ${w / 2}px / 0 0 ${b}px ${b}px`;
+  // beyond the canvas edge the arc would curl away and leave the corners of a wide window uncovered:
+  // from there on the cover continues flat at the height the arc has at the edge
+  const drop = b * (1 - Math.sqrt(1 - (DESIGN_W / 2 / (w / 2)) ** 2)), WING = 4000;
+  for (const left of [(w - DESIGN_W) / 2 - WING, (w + DESIGN_W) / 2]) {
+    const wing = document.createElement("div");
+    Object.assign(wing.style, { position: "absolute", left: `${left}px`, width: `${WING}px`, background: "inherit",
+      ...(side === "top" ? { top: `${drop}px`, bottom: 0 } : { top: 0, height: `${h - drop}px` }) });
+    el.appendChild(wing);
+  }
   gsap.set(el, { y: side === "top" ? DESIGN_H + 10 : -h - 10, opacity: 0 });
   layers.domes.appendChild(el);
   return el;

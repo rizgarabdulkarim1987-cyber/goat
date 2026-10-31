@@ -13,7 +13,12 @@ const MAIN = [["home", "/"], ["about", "/about.html"], ["work", "/work.html"], [
 const BOTTOM = [["music", "/music.html"], ["search", "/search.html"]];
 
 // the fixed nav column is the home page's own: same 1438x960 canvas, scaled to fit, same positions
-function fit() { document.documentElement.style.setProperty("--s", Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H)); }
+function fit() {
+  const s = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H), root = document.documentElement.style;
+  root.setProperty("--s", s);
+  root.setProperty("--ex", `${Math.max(0, (innerWidth / s - DESIGN_W) / 2)}px`);
+  root.setProperty("--ey", `${Math.max(0, (innerHeight / s - DESIGN_H) / 2)}px`);
+}
 
 let current = "home";
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;

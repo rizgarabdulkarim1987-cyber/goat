@@ -36,7 +36,8 @@ a { color: inherit; text-decoration: none; }
 #stage { position: fixed; inset: 0; overflow: hidden; background: var(--bg); }
 .layer { position: absolute; inset: 0; pointer-events: none; }
 /* every positioned thing uses design units */
-.el { position: absolute; left: 0; top: 0; white-space: nowrap; line-height: 1; will-change: transform, opacity; }
+/* no will-change here: a text layer promoted for its transform is rasterised once and then stretched, which blurs it while it scales */
+.el { position: absolute; left: 0; top: 0; white-space: nowrap; line-height: 1; }
 .el.wrap { white-space: normal; }
 .el.wrap { white-space: normal; }
 .circle-img { position: absolute; left: 0; top: 0; border-radius: 50%; overflow: hidden; background-size: cover; background-position: center; will-change: transform, opacity; }
@@ -62,7 +63,10 @@ a { color: inherit; text-decoration: none; }
 .dome { position: absolute; left: 0; top: 0; will-change: transform; }
 
 /* fixed UI */
-#ui { position: absolute; inset: 0; color: #fff; mix-blend-mode: difference; pointer-events: none; z-index: 50; }
+/* the column, the language switch and the social label sit at the edges of the window, not of the 1438 x 960 canvas:
+   --ex / --ey are how many design px the window shows beyond the canvas on each side (negative ey: the canvas is cropped) */
+:root { --ex: 0px; --ey: 0px; }
+#ui { position: absolute; left: calc(0px - var(--ex)); top: calc(0px - var(--ey)); width: calc(1438px + 2 * var(--ex)); height: calc(960px + 2 * var(--ey)); color: #fff; mix-blend-mode: difference; pointer-events: none; z-index: 50; }
 #ui a { pointer-events: auto; }
 .logo { position: absolute; left: calc(64 * var(--u)); top: calc(32 * var(--u)); display: block; width: calc(31 * var(--u)); }
 .logo img { display: block; width: 100%; }
@@ -70,9 +74,9 @@ a { color: inherit; text-decoration: none; }
 .logo-text-wrap { position: relative; display: block; width: calc(28 * var(--u)); height: calc(43.5 * var(--u)); margin: calc(6 * var(--u)) 0 0 calc(1.5 * var(--u)); }
 .logo-text-wrap .logo-text { position: absolute; left: 0; top: 0; width: calc(43.5 * var(--u)); height: calc(28 * var(--u)); transform-origin: 0 0; transform: translateX(calc(28 * var(--u))) rotate(90deg); }
 .nav-main, .nav-bottom { position: absolute; left: calc(64 * var(--u)); display: flex; flex-direction: column; font-size: calc(15.5 * var(--u)); font-weight: 300; }
-.nav-main { top: calc(402 * var(--u)); } .nav-main a { height: calc(32 * var(--u)); line-height: calc(26 * var(--u)); }
-.nav-bottom { top: calc(852 * var(--u)); } .nav-bottom a { height: calc(32 * var(--u)); line-height: calc(26 * var(--u)); }
-.social { position: absolute; left: calc(1352 * var(--u)); top: calc(458 * var(--u)); font-size: calc(15 * var(--u)); writing-mode: vertical-rl; }
+.nav-main { top: calc(50% - 78 * var(--u)); } .nav-main a { height: calc(32 * var(--u)); line-height: calc(26 * var(--u)); }
+.nav-bottom { top: auto; bottom: calc(44 * var(--u)); } .nav-bottom a { height: calc(32 * var(--u)); line-height: calc(26 * var(--u)); }
+.social { position: absolute; right: calc(64 * var(--u)); top: calc(50% - 22 * var(--u)); font-size: calc(15 * var(--u)); writing-mode: vertical-rl; }
 
 /* control panel */
 #panel { position: fixed; right: 16px; bottom: 16px; z-index: 100; font: 13px/1.4 system-ui, sans-serif; color: #fff; }
@@ -93,7 +97,7 @@ a { color: inherit; text-decoration: none; }
 #panel .reset { margin-top: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
 
 /* language switch: top right of the fixed column, in every language */
-.langs { position: absolute; left: calc(1296 * var(--u)); top: calc(32 * var(--u)); display: flex; gap: calc(14 * var(--u)); direction: ltr; font-size: calc(15 * var(--u)); }
+.langs { position: absolute; right: calc(30 * var(--u)); top: calc(32 * var(--u)); display: flex; gap: calc(14 * var(--u)); direction: ltr; font-size: calc(15 * var(--u)); }
 .langs button { font: inherit; font-weight: 300; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; opacity: .55; pointer-events: auto; transition: opacity .2s; }
 .langs button:hover, .langs button[aria-current] { opacity: 1; }
 .langs button[aria-current] { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
