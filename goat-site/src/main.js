@@ -190,12 +190,12 @@ function curve(d, o = {}) {
 function cover(side, b) {
   const el = document.createElement("div");
   el.className = "dome";
-  const w = 2800, h = side === "top" ? 6000 : 1400;
+  const w = 2800, h = side === "top" ? 4200 : 1400;
   Object.assign(el.style, { width: `${w}px`, height: `${h}px`, left: `${(DESIGN_W - w) / 2}px`, top: 0, background: "#000" });
   el.style.borderRadius = side === "top" ? `${w / 2}px ${w / 2}px 0 0 / ${b}px ${b}px 0 0` : `0 0 ${w / 2}px ${w / 2}px / 0 0 ${b}px ${b}px`;
   // beyond the canvas edge the arc would curl away and leave the corners of a wide window uncovered:
   // from there on the cover continues flat at the height the arc has at the edge
-  const drop = b * (1 - Math.sqrt(1 - (DESIGN_W / 2 / (w / 2)) ** 2)), WING = 4000;
+  const drop = b * (1 - Math.sqrt(1 - (DESIGN_W / 2 / (w / 2)) ** 2)), WING = 1100;
   for (const left of [(w - DESIGN_W) / 2 - WING, (w + DESIGN_W) / 2]) {
     const wing = document.createElement("div");
     Object.assign(wing.style, { position: "absolute", left: `${left}px`, width: `${WING}px`, background: "inherit",

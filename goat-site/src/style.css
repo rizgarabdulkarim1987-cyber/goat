@@ -14,9 +14,9 @@
    (--s is set from JS), so every position matches the reference at any size. */
 #design { position: absolute; left: 50%; top: 50%; width: 1438px; height: 960px; --u: 1px; --s: 1;
   background: var(--bg);
-  /* on a wide window the scene carries on to the sides instead of leaving bars: the colour is extended with a shadow,
+  /* on a wide window the scene carries on to the sides instead of leaving bars: the colour is extended by the clip margin,
      the black wipes are wider than the canvas, and only the top and bottom edges clip */
-  clip-path: inset(-3000px); box-shadow: 0 0 0 3000px var(--bg);
+  clip-path: inset(-1300px);
   transform: translate(-50%, -50%) scale(var(--s)); transform-origin: center; }
 #layer-a svg, #layer-lines svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .outline { color: transparent; -webkit-text-stroke: 2px #2c2c2c; }
