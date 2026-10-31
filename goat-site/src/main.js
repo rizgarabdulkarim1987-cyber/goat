@@ -64,7 +64,9 @@ function fit() {
   document.documentElement.style.setProperty("--s", s); // the header is sized from it
 }
 fit();
-addEventListener("resize", fit);
+// on a phone the address bar sliding away changes only the height, on the very first scroll: nothing is re-laid out for that
+const onResize = (f) => { let lastW = innerWidth; return () => { if (matchMedia("(max-width: 820px)").matches && innerWidth === lastW) return; lastW = innerWidth; f(); }; };
+addEventListener("resize", onResize(fit));
 
 /* ---------- element factories (positions via gsap x/y, in design px) ---------- */
 function text(str, o = {}) {
@@ -234,6 +236,11 @@ const draw = (p, t0, t1, d = 1.2, o = 1) => { tl.to(p, { opacity: o, duration: 0
  * ================================================================== */
 // the headline (goat -> scramble -> dream, photo inside the glyphs) is a baked clip
 clip("hero1", { layer: layers.a });
+
+// an invitation under the first headline; it fades as soon as the scroll starts
+const PHONE = matchMedia("(max-width: 820px)").matches;
+const hint = text(tx("scrollHint", "Scroll down to live the dream with us"), { fs: PHONE ? 50 : 24, fw: 400, color: "#000", w: PHONE ? 1100 : 900, align: "center", layer: layers.a, opacity: 1, x: 719, y: PHONE ? 800 : 790 });
+hide(hint, 0.6, 0.8);
 
 const wA = text(tx("wA", "a"), { fs: 24, color: "#000", rot: -90, layer: layers.a });
 const wPlace = text(tx("wPlace", "place"), { fs: 24, color: "#000", rot: -90, layer: layers.a });
@@ -711,7 +718,7 @@ function bind() {
   });
 }
 bind();
-addEventListener("resize", sizeSpace);
+addEventListener("resize", onResize(sizeSpace));
 
 const lenis = CMP ? null : new Lenis({ lerp: 0.12, smoothWheel: true });
 if (lenis) {
