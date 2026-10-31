@@ -15,7 +15,7 @@ const CMP = params.get("cmp") === "1";
 // The circle clips (plant, runners, eye) and the end counters come from the backend; if it is down the
 // static sprite sheets and 24s are used. Only the picture source and the counter values depend on this:
 // no time, position, size or easing below does.
-const [{ SEQ, loaded: framesLoaded }, counters, content] = await Promise.all([loadSeq(STATIC_SEQ), loadCounters(), loadContent()]);
+const [{ SEQ, loaded: framesLoaded }, counters, content] = await Promise.all([loadSeq(STATIC_SEQ, { all: CMP }), loadCounters(), loadContent()]);
 // every word on the page, and the loose pictures, can be changed from the backend (admin page); the strings in this file are the defaults
 const tx = (id, def) => content?.texts?.[id] ?? def;
 const imageUrl = (id, def) => content?.images?.[id] ?? def;

@@ -10,25 +10,42 @@ const BACKEND = ["leapA", "cheer", "leapB", "plant", "eye", "hero1", "hero2", "c
 const SHEETS = ["goat", "hillrise"]; // baked sprite sheets: the picture comes from the backend too (the headline words hero1/hero2 are frames at twice the size)
 const PARALLEL = 8;
 
-function makeFrames(meta) {
+// Only a few frames of a clip are kept decoded at once: all of them together are over a gigabyte of pixels,
+// which a phone cannot hold (the tab is killed). The ones near the current frame stay; the browser's own cache
+// keeps the files, so a frame that was dropped comes back quickly.
+const KEEP = 10;
+function makeFrames(meta, keepAll = false) {
   const images = new Array(meta.n);
   const listeners = new Set();
+  let cur = 0;
+  const evict = () => {
+    if (keepAll) return;
+    const have = [];
+    images.forEach((e, k) => { if (e?.ok) have.push(k); });
+    if (have.length <= KEEP) return;
+    have.sort((a, b) => Math.abs(b - cur) - Math.abs(a - cur));
+    for (const k of have.slice(0, have.length - KEEP)) { images[k].img.src = ""; images[k] = undefined; }
+  };
   const load = (i) => {
     if (images[i]) return images[i].done;
     const img = new Image();
-    images[i] = { img, ok: false, done: new Promise((resolve) => {
-      img.onload = () => { images[i].ok = true; listeners.forEach((f) => f(i)); resolve(true); };
+    const entry = { img, ok: false };
+    entry.done = new Promise((resolve) => {
+      img.onload = () => { entry.ok = true; evict(); listeners.forEach((f) => f(i)); resolve(true); };
       img.onerror = () => resolve(false);
-    }) };
+    });
+    images[i] = entry;
     img.src = meta.frames[i];
-    return images[i].done;
+    return entry.done;
   };
   return {
     load,
     // the picture to draw for frame i: itself, else the closest earlier one that has arrived, else a later one
     best(i) {
+      cur = i;
       load(i);
-      if (images[i].ok) return images[i].img;
+      if (!keepAll) for (const d of [1, 2, 3, -1]) if (i + d >= 0 && i + d < meta.n) load(i + d);
+      if (images[i]?.ok) return images[i].img;
       for (let k = i - 1; k >= 0; k--) if (images[k]?.ok) return images[k].img;
       for (let k = i + 1; k < meta.n; k++) if (images[k]?.ok) return images[k].img;
       return null;
@@ -37,7 +54,7 @@ function makeFrames(meta) {
   };
 }
 
-// loads the remaining frames of every clip in timeline order, a few at a time
+// a capture (compare.py) needs every frame; the site itself fetches frames as the scroll reaches them
 function streamAll(clips) {
   const queue = clips.flatMap((c) => Array.from({ length: c.n }, (_, i) => () => c.frameSet.load(i)));
   let next = 0;
@@ -47,14 +64,14 @@ function streamAll(clips) {
 
 /** Merge the backend's clips over the static metadata. Resolves with { SEQ, loaded } where `loaded`
  *  resolves once every frame has been requested (the page does not wait for it unless asked to). */
-export async function loadSeq(staticSeq) {
+export async function loadSeq(staticSeq, { all = false } = {}) {
   const SEQ = { ...staticSeq };
   let remote;
   try { remote = await api("/api/clips"); } catch { return { SEQ, loaded: Promise.resolve(), source: "static" }; }
   const used = [];
   await Promise.all(BACKEND.filter((n) => remote[n]).map(async (name) => {
     const meta = remote[name];
-    const frameSet = makeFrames(meta);
+    const frameSet = makeFrames(meta, all);
     // the first frame decides whether this clip can come from the backend at all
     if (!(await frameSet.load(0))) return;
     SEQ[name] = { ...staticSeq[name], ...meta, frameSet };
@@ -68,7 +85,7 @@ export async function loadSeq(staticSeq) {
     img.src = remote[name].src;
   })));
   const ordered = used.sort((a, b) => a.t0 - b.t0);
-  return { SEQ, loaded: streamAll(ordered), source: used.length ? "backend" : "static" };
+  return { SEQ, loaded: all ? streamAll(ordered) : Promise.resolve(), source: used.length ? "backend" : "static" };
 }
 
 /** the end-of-page counters, or null when the backend is unavailable */
