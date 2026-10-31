@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import { readFile, writeFile, rename, cp, access } from "node:fs/promises";
+import { readFile, writeFile, rename } from "node:fs/promises";
+import { cpSync, existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mountAdmin } from "./admin.js";
@@ -11,8 +12,8 @@ const BUNDLED = path.join(ROOT, "data");
 // what was edited in the admin page; the first start copies the bundled data there
 const DATA = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : BUNDLED;
 if (DATA !== BUNDLED) {
-  const have = await access(path.join(DATA, "clips.json")).then(() => true, () => false);
-  if (!have) await cp(BUNDLED, DATA, { recursive: true });
+  // synchronous on purpose: the host loads this file with require(), which cannot wait for a top-level await
+  if (!existsSync(path.join(DATA, "clips.json"))) cpSync(BUNDLED, DATA, { recursive: true });
 }
 // the built site (goat-site/dist), when there is one, is served from the same server: one address for pages and API
 const SITE = path.join(ROOT, "..", "goat-site", "dist");
