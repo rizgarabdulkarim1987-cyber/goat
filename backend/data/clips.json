@@ -1945,8 +1945,8 @@
     "w": 870,
     "h": 320,
     "cell": [
-      652,
-      240
+      870,
+      320
     ],
     "keys": [
       [
@@ -1959,7 +1959,7 @@
     "round": false,
     "kind": "sheet",
     "file": "seq/hero1.png",
-    "updatedAt": 1793486253332
+    "updatedAt": 1793486468582
   },
   "hero2": {
     "t0": 48.3,
@@ -1971,8 +1971,8 @@
     "w": 870,
     "h": 320,
     "cell": [
-      652,
-      240
+      870,
+      320
     ],
     "keys": [
       [
@@ -1985,7 +1985,7 @@
     "round": false,
     "kind": "sheet",
     "file": "seq/hero2.png",
-    "updatedAt": 1793486253332
+    "updatedAt": 1793486468582
   },
   "goat": {
     "t0": 75.3,
