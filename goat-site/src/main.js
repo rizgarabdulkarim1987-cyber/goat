@@ -24,7 +24,7 @@ document.querySelectorAll("[data-t]").forEach((a) => { a.textContent = t(a.datas
 document.getElementById("lang-slot")?.replaceWith(langSwitch());
 { // the phone header: the same links and languages, in a sheet opened by the two icons
   const sheet = document.getElementById("m-sheet"), pop = document.getElementById("m-lang"), root = document.documentElement;
-  document.querySelectorAll(".nav-main a, .nav-bottom a, .social").forEach((a, i) => { const c = a.cloneNode(true); c.className = i === 5 ? "first-of-group" : ""; c.removeAttribute("data-t"); sheet.append(c); });
+  document.querySelectorAll(".nav-main a").forEach((a) => { const c = a.cloneNode(true); c.className = ""; c.removeAttribute("data-t"); sheet.append(c); });
   pop.append(langSwitch());
   const menu = document.querySelector(".m-menu"), lg = document.querySelector(".m-langbtn");
   const set = (cls, btn, on) => { root.classList.toggle(cls, on); btn.setAttribute("aria-expanded", String(on)); };
