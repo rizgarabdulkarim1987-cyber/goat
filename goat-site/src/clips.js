@@ -6,8 +6,8 @@ import { setContent } from "./lang.js";
    so the timeline never changes; only the way a frame is drawn does. If the backend does not answer,
    or a clip's first frame cannot be fetched, that clip keeps its static sprite sheet from /public/seq. */
 
-const BACKEND = ["leapA", "cheer", "leapB", "plant", "eye", "can1", "can2", "can3", "can4"]; // can1..can4: the four circles of the work scene
-const SHEETS = ["hero1", "hero2", "goat", "hillrise"]; // baked sprite sheets: the picture comes from the backend too
+const BACKEND = ["leapA", "cheer", "leapB", "plant", "eye", "hero1", "hero2", "can1", "can2", "can3", "can4"]; // can1..can4: the four circles of the work scene
+const SHEETS = ["goat", "hillrise"]; // baked sprite sheets: the picture comes from the backend too (the headline words hero1/hero2 are frames at twice the size)
 const PARALLEL = 8;
 
 function makeFrames(meta) {

@@ -186,7 +186,7 @@ async function circlesView() {
   const clips = await fetch("/api/clips").then((r) => r.json());
   return h("div", null, h("h2", null, "Circles"),
     h("p", { class: "hint" }, "The moving pictures inside the circles. Upload a video (its frames are cut at the clip's fps, cropped to a square and scaled) or a set of pictures (taken in file-name order). \"t0 / t1\" are the seconds on the page's timeline when the circle appears and leaves (for the four work-scene circles can1 to can4 the movement is fixed: t0 / t1 say when the picture starts playing and stops, a video loops in between, and one picture just stays; for one picture use \"or pictures\"). \"Move the end to fit\" sets t1 to the end of the new footage; leave it off to keep the timing."),
-    h("div", { class: "grid" }, Object.entries(clips).filter(([, c]) => c.kind === "frames").map(([name, c]) => {
+    h("div", { class: "grid" }, Object.entries(clips).filter(([, c]) => c.kind === "frames" && !c.locked).map(([name, c]) => {
       const first = h("img", { src: c.frames[Math.floor(c.n / 2)], alt: `${name}, middle frame` });
       const meta = h("div", { class: "meta" });
       const setMeta = (m) => { meta.textContent = `${m.n} frames, ${m.fps} fps = ${(m.n / m.fps).toFixed(1)} s. on screen ${m.t0}s to ${m.t1}s`; };

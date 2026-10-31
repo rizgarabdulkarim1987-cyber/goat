@@ -160,6 +160,7 @@ export function mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin
   const circleOnly = wrap(async (req, res, next) => {
     const c = (await readJson("clips.json"))[req.params.name];
     if (!c) return res.status(404).json({ error: "unknown clip" });
+    if (c.locked) return res.status(400).json({ error: "the headline words are part of the page design and cannot be replaced here" });
     if (c.kind !== "frames") return res.status(400).json({ error: "that one is a sprite sheet: replace it under pictures" });
     next();
   });
