@@ -44,17 +44,17 @@ def lerp1(keys, t):
 CLIPS = {
     # name: dict(t0, t1, R (design radius), cell (sprite px), keys, round)
     # keys measured from the half-second sheets; `fps` overrides FPS for fast clips
-    "leapA": dict(t0=8.3, t1=13.3, R=190, cell=300, round=True, fps=FAST_FPS,
+    "leapA": dict(t0=8.3, t1=13.3, R=190, cell=380, round=True, fps=FAST_FPS,
                   keys=[[8.3, 1130, 660, 0.18], [8.4, 1007, 649, 0.38], [8.5, 870, 600, 0.5], [8.6, 745, 540, 0.6], [8.8, 560, 476, 0.8],
                         [9.0, 466, 462, 1], [9.5, 420, 470, 1], [9.9, 420, 458, 1], [12.8, 420, 450, 1],
                         [13.0, 418, 420, 0.82], [13.1, 414, 400, 0.6], [13.2, 410, 380, 0.3], [13.3, 410, 380, 0]]),
-    "cheer": dict(t0=13.1, t1=18.2, R=190, cell=300, round=True, fps=FAST_FPS,
+    "cheer": dict(t0=13.1, t1=18.2, R=190, cell=380, round=True, fps=FAST_FPS,
                   keys=[[13.1, 318, 551, 0.3], [13.2, 312, 547, 0.75], [13.3, 306, 545, 1], [17.9, 324, 537, 1],
                         [18.0, 318, 538, 0.7], [18.1, 315, 540, 0.3], [18.2, 315, 540, 0]]),
-    "leapB": dict(t0=17.9, t1=23.5, R=214, cell=320, round=True, fps=FAST_FPS,
+    "leapB": dict(t0=17.9, t1=23.5, R=214, cell=428, round=True, fps=FAST_FPS,
                   keys=[[17.9, 1133, 297, 0], [18.0, 1133, 296, 0.2], [18.2, 1136, 295, 0.6], [18.5, 1140, 294, 1],
                         [23.2, 1140, 294, 1], [23.3, 1136, 290, 0.6], [23.4, 1133, 288, 0.25], [23.5, 1133, 288, 0]]),
-    "plant": dict(t0=34.4, t1=42.1, R=277, cell=360, round=True, fps=FAST_FPS,
+    "plant": dict(t0=34.4, t1=42.1, R=277, cell=554, round=True, fps=FAST_FPS,
                   # fade-in and exit paths measured by disc detection on the extracted frames
                   keys=[[34.4, 630, 184, 0.25], [34.5, 664, 242, 0.48], [34.6, 687, 290, 0.63], [34.7, 702, 330, 0.73],
                         [34.8, 711, 366, 0.83], [35.0, 716, 412, 0.95], [35.2, 716, 445, 1], [35.5, 716, 496, 1],
@@ -62,7 +62,7 @@ CLIPS = {
                         [41.5, 716, 358, 1], [41.6, 716, 265, 1], [41.7, 716, 182, 1], [41.8, 716, 94, 1], [41.9, 716, 0, 1],
                         [42.0, 716, -110, 1], [42.1, 716, -300, 1]]),
     # the goat eye: grows in at the top right, settles, drifts up, then leaves with the headline
-    "eye": dict(t0=67.4, t1=74.9, R=294, cell=360, round=True,
+    "eye": dict(t0=67.4, t1=74.9, R=294, cell=588, round=True,
                 keys=[[67.4, 900, 160, 0.06], [67.5, 867, 174, 0.105], [67.6, 717, 194, 0.177], [67.7, 610, 222, 0.26],
                       [67.8, 531, 249, 0.35], [67.9, 471, 273, 0.45], [68.0, 425, 294, 0.55], [68.1, 390, 311, 0.65],
                       [68.2, 364, 324, 0.74], [68.3, 345, 335, 0.82], [68.4, 331, 343, 0.9], [68.5, 322, 349, 0.95],
@@ -82,9 +82,9 @@ CLIPS = {
     # baked as a box, keyed against the white page so only the glyphs stay opaque
     # (hero1 ends just before the rising hill reaches the box)
     # runs until the rising hill has swallowed the letters; the baked hill pixels sit under the DOM hill
-    "hero1": dict(t0=0.0, t1=7.4, box=(870, 320), cell=(652, 240), round=False, keywhite=True, keys=[[0, 725, 480, 1]]),
+    "hero1": dict(t0=0.0, t1=7.4, box=(870, 320), cell=(870, 320), round=False, keywhite=True, keys=[[0, 725, 480, 1]]),
     # hero2 starts while the black cover is still over the top of its box: rows above the cover's edge are keyed out
-    "hero2": dict(t0=48.3, t1=55.8, box=(870, 320), cell=(652, 240), round=False, keywhite=True, cover=COVER2, keys=[[48.3, 735, 505, 1]]),
+    "hero2": dict(t0=48.3, t1=55.8, box=(870, 320), cell=(870, 320), round=False, keywhite=True, cover=COVER2, keys=[[48.3, 735, 505, 1]]),
 }
 
 
@@ -378,7 +378,7 @@ def bake_clip(name, c):
         Image.fromarray(cv2.cvtColor(sheet, cv2.COLOR_BGRA2RGBA)).save(f"public/seq/{name}.png", optimize=True)
         src = f"/seq/{name}.png"
     else:
-        cv2.imwrite(f"public/seq/{name}.jpg", sheet, [cv2.IMWRITE_JPEG_QUALITY, 84])
+        cv2.imwrite(f"public/seq/{name}.jpg", sheet, [cv2.IMWRITE_JPEG_QUALITY, 92])
         src = f"/seq/{name}.jpg"
     meta = dict(src=src, **clip_meta(c, n, fps, cols, rows, cell))
     print(name, n, "frames", cols, "x", rows)
@@ -410,7 +410,7 @@ def bake_frames(names):
         shutil.rmtree(d, ignore_errors=True)
         os.makedirs(d)
         for i, f in enumerate(files):
-            cv2.imwrite(os.path.join(d, f"{i:04d}.jpg"), make_tile(name, c, f, i, fps, files), [cv2.IMWRITE_JPEG_QUALITY, 84])
+            cv2.imwrite(os.path.join(d, f"{i:04d}.jpg"), make_tile(name, c, f, i, fps, files), [cv2.IMWRITE_JPEG_QUALITY, 92])
         cols = int(np.ceil(np.sqrt(n * cell[1] / cell[0])))
         metas[name] = dict(clip_meta(c, n, fps, cols, int(np.ceil(n / cols)), cell), ext="jpg", kind="frames")
         print(name, n, "frames ->", d)
@@ -428,7 +428,7 @@ def sheet_from_frames(names):
         for i in range(m["n"]):
             tile = cv2.imread(os.path.join(BACKEND_DATA, "frames", name, f"{i:04d}.jpg"))
             sheet[(i // m["cols"]) * ch:(i // m["cols"] + 1) * ch, (i % m["cols"]) * cw:(i % m["cols"] + 1) * cw] = tile
-        cv2.imwrite(f"public/seq/{name}.jpg", sheet, [cv2.IMWRITE_JPEG_QUALITY, 84])
+        cv2.imwrite(f"public/seq/{name}.jpg", sheet, [cv2.IMWRITE_JPEG_QUALITY, 92])
         print(name, "sheet rebuilt from", m["n"], "frames")
 
 

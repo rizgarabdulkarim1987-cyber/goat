@@ -706,12 +706,14 @@ if (qt !== null) {
 }
 window.__tl = tl;
 
-if (!CMP) mountPanel({
+// the tuning panel is a design tool: it only appears with ?controls on the address
+if (!CMP && params.has("controls")) mountPanel({
   settings,
   onSpeed() { sizeSpace(); bind(); ScrollTrigger.refresh(); },
   onScrub() { bind(); },
   onColors() {
     design.style.background = settings.whiteBg;
+    design.style.setProperty("--bg", settings.whiteBg);
     document.querySelectorAll(".dome").forEach((d) => (d.style.background = settings.blackBg));
     document.querySelectorAll('[data-role="red"], [data-role="red-btn"]').forEach((e) => (e.style.background = settings.red));
   },

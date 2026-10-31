@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { readFile, writeFile, rename } from "node:fs/promises";
-import { cpSync, existsSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mountAdmin } from "./admin.js";
@@ -14,6 +14,26 @@ const DATA = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : BUNDLED
 if (DATA !== BUNDLED) {
   // synchronous on purpose: the host loads this file with require(), which cannot wait for a top-level await
   if (!existsSync(path.join(DATA, "clips.json"))) cpSync(BUNDLED, DATA, { recursive: true });
+  else applyRelease();
+}
+// A new deploy can ship better pictures for some clips (data/release.json: { version, replace: [clip names] }).
+// When its version is newer than the one this data folder has applied, those clips' frames, sheets and metadata are
+// replaced; everything else edited in the admin page (words, other pictures, messages) is left alone.
+function applyRelease() {
+  const read = (dir) => { try { return JSON.parse(readFileSync(path.join(dir, "release.json"), "utf8")); } catch { return { version: 0, replace: [] }; } };
+  const shipped = read(BUNDLED), have = read(DATA);
+  if (!(shipped.version > have.version)) return;
+  const clips = JSON.parse(readFileSync(path.join(DATA, "clips.json"), "utf8"));
+  const fresh = JSON.parse(readFileSync(path.join(BUNDLED, "clips.json"), "utf8"));
+  for (const name of shipped.replace) {
+    if (!fresh[name]) continue;
+    clips[name] = fresh[name];
+    const frames = path.join(BUNDLED, "frames", name);
+    if (existsSync(frames)) { rmSync(path.join(DATA, "frames", name), { recursive: true, force: true }); cpSync(frames, path.join(DATA, "frames", name), { recursive: true }); }
+    if (fresh[name].file) { mkdirSync(path.dirname(path.join(DATA, "media", fresh[name].file)), { recursive: true }); cpSync(path.join(BUNDLED, "media", fresh[name].file), path.join(DATA, "media", fresh[name].file)); }
+  }
+  writeFileSync(path.join(DATA, "clips.json"), JSON.stringify(clips, null, 2));
+  writeFileSync(path.join(DATA, "release.json"), JSON.stringify(shipped));
 }
 // the built site (goat-site/dist), when there is one, is served from the same server: one address for pages and API
 const SITE = path.join(ROOT, "..", "goat-site", "dist");

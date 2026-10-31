@@ -136,3 +136,7 @@ python -I compare.py 0.5 8 24 chk2     # runner scenes -> cmp/chk2_*.png
 ```
 
 Run the compare scripts with both servers up: the plant and runner circles are drawn from the backend's frames.
+
+### Shipping better pictures with a deploy
+
+`backend/data/release.json` is `{ "version": N, "replace": [clip names] }`. When a server's data folder (`DATA_DIR`) has an older version, the next start replaces just those clips (frames, sheets, timing) from the deployed copy and leaves everything else edited in the admin page alone. Raise `version` and list the clips whenever you re-bake pictures with `goat-site/bake.py`.
