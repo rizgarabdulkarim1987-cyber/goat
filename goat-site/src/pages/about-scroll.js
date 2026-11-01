@@ -122,14 +122,37 @@ export function aboutScroll(page, rtl) {
 
     // depth: every layer glides at its own pace through the whole scene, and sits exactly on its design spot when the scene is centred
     const glide = (els, amount) => els.forEach((el, i) => gsap.fromTo(el, { "--py": amount(i) }, { "--py": -amount(i), ease: "none", scrollTrigger: { trigger: scene, start: "top bottom", end: "bottom top", scrub: 0.9 } }));
-    glide(parts('[data-m="circ"]'), (i) => (i % 2 ? -1 : 1) * (34 + (i % 3) * 14));
-    glide(parts('[data-m="giant"]'), () => 28);
-    glide(parts('[data-m="title"]'), () => 16);
-    glide(parts('[data-m="word"]'), (i) => (i % 2 ? 1 : -1) * (10 + (i % 4) * 7));
+    glide(parts('[data-m="circ"]'), (i) => (i % 2 ? -1 : 1) * (70 + (i % 3) * 26));
+    glide(parts('[data-m="giant"]'), () => 56);
+    glide(parts('[data-m="title"]'), () => 30);
+    glide(parts('[data-m="word"]'), (i) => (i % 2 ? 1 : -1) * (22 + (i % 4) * 12));
 
     // the team and the clients pop in one after the other
     parts('[data-m="team"]').forEach((list) => tl.fromTo([...list.children], { opacity: 0, scale: 0.6, y: 30 }, { opacity: 1, scale: 1, y: 0, stagger: 0.04, duration: 0.2 }, 0.12));
   });
+
+  // alive even when you stop scrolling: pictures, rings and dots float on slow loops, and the layers lean with the pointer.
+  // Only the scenes on screen move (the loops pause as a scene leaves).
+  const live = new Set();
+  $$(".scene").forEach((scene) => {
+    const els = [...$$('[data-m="circ"], .ring, .dot, [data-m="giant"], [data-m="word"]', scene)].filter((el) => !el.closest(".dark-circ") || el.classList.contains("dark-circ"));
+    const loops = els.map((el, i) => {
+      const a = 6 + (i % 4) * 3, d = 3.2 + ((i * 7) % 5) * 0.8;
+      return gsap.timeline({ paused: true, repeat: -1, yoyo: true, defaults: { ease: "sine.inOut" } }).fromTo(el, { "--ay": -a, "--ax": -a * 0.6 }, { "--ay": a, "--ax": a * 0.6, duration: d });
+    });
+    const lean = els.map((el) => {
+      const k = el.matches('[data-m="circ"]') ? 20 : el.matches(".ring, .dot") ? 12 : el.matches('[data-m="giant"]') ? 14 : 6;
+      return { k, x: gsap.quickTo(el, "--px", { duration: 1.1, ease: "power3.out" }), y: gsap.quickTo(el, "--pyy", { duration: 1.1, ease: "power3.out" }) };
+    });
+    scene._lean = lean;
+    ScrollTrigger.create({ trigger: scene, start: "top bottom", end: "bottom top", onToggle: (st) => { loops.forEach((l) => (st.isActive ? l.play() : l.pause())); st.isActive ? live.add(scene) : live.delete(scene); } });
+  });
+  if (matchMedia("(hover: hover)").matches) {
+    addEventListener("pointermove", (e) => {
+      const nx = e.clientX / innerWidth - 0.5, ny = e.clientY / innerHeight - 0.5;
+      live.forEach((sc) => sc._lean.forEach((l) => { l.x(-nx * l.k * 2); l.y(-ny * l.k * 2); }));
+    }, { passive: true });
+  }
 
   // buttons lean towards the pointer
   if (matchMedia("(hover: hover)").matches) {
