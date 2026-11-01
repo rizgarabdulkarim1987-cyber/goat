@@ -89,11 +89,15 @@ if (OFF.has("svg")) { layers.a.style.display = "none"; layers.lines.style.displa
 if (OFF.has("text")) { layers.main.style.display = "none"; layers.top.style.display = "none"; }
 if (OFF.has("blend")) document.getElementById("ui").style.mixBlendMode = "normal";
 if (OFF.has("all")) design.style.display = "none";
+const covers = []; // the black wipe covers (cover() below); re-sized to the window by fit
+let view = { ex: 0, ey: 0 }; // how far the window reaches beyond the canvas, in design px (set by fit)
 // The whole canvas is always in view (phones show it small, with the scene's colour carrying on above and below).
 function fit() {
   const s = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H);
   design.style.setProperty("--s", s);
   document.documentElement.style.setProperty("--s", s); // the header is sized from it
+  view = { ex: Math.max(0, (innerWidth / s - DESIGN_W) / 2), ey: Math.max(0, (innerHeight / s - DESIGN_H) / 2) };
+  covers.forEach((c) => { c.size(); c.sync(); });
 }
 fit();
 // on a phone the address bar sliding away changes only the height, on the very first scroll: nothing is re-laid out for that
@@ -223,32 +227,58 @@ function curve(d, o = {}) {
   return p;
 }
 
-// a black cover whose top (or bottom) edge is a wide elliptical arc
+// A black cover whose top (or bottom) edge is a wide elliptical arc. The timeline moves `el`, which holds only the arc
+// (2800 x b) and its two flat wings; the black beyond the arc is a separate `fill`, never larger than the window, whose
+// clip edge follows the arc every frame. One tall cover element used to do both, and an iPhone killed the page the
+// moment it started to move (the crash was reproduced with every cover off: the film then ran to the end).
 function cover(side, b) {
   const el = document.createElement("div");
   el.className = "dome";
-  const w = 2800, h = side === "top" ? 4200 : 1400;
-  Object.assign(el.style, { width: `${w}px`, height: `${h}px`, left: `${(DESIGN_W - w) / 2}px`, top: 0 });
-  // only the thin arc is a rounded shape; the rest is plain flat colour (a rounded box this big needs a picture of its own, which an iPhone cannot hold)
-  const cap = document.createElement("div"), body = document.createElement("div");
-  Object.assign(cap.style, { position: "absolute", left: 0, width: `${w}px`, height: `${b}px`, background: "#000",
-    top: side === "top" ? 0 : `${h - b}px`,
+  const w = 2800, h = side === "top" ? 4200 : 1400; // h: the coordinate frame the keys were measured in (a bottom cover's arc sits at h - b)
+  // el is only as wide as the window and exactly the arc's height; its static top puts the arc where the keys expect it
+  Object.assign(el.style, { height: `${b}px`, top: `${side === "top" ? 0 : h - b}px`, overflow: "hidden" });
+  const cap = document.createElement("div");
+  Object.assign(cap.style, { position: "absolute", top: 0, width: `${w}px`, height: `${b}px`, background: "#000",
     borderRadius: side === "top" ? `${w / 2}px ${w / 2}px 0 0 / ${b}px ${b}px 0 0` : `0 0 ${w / 2}px ${w / 2}px / 0 0 ${b}px ${b}px` });
-  Object.assign(body.style, { position: "absolute", left: 0, width: `${w}px`, background: "#000", top: side === "top" ? `${b}px` : 0, height: `${h - b}px` });
-  el.append(cap, body);
+  el.append(cap);
   // beyond the canvas edge the arc would curl away and leave the corners of a wide window uncovered:
   // from there on the cover continues flat at the height the arc has at the edge
   const drop = b * (1 - Math.sqrt(1 - (DESIGN_W / 2 / (w / 2)) ** 2)), WING = 1100;
-  for (const left of [(w - DESIGN_W) / 2 - WING, (w + DESIGN_W) / 2]) {
+  const wings = [(w - DESIGN_W) / 2 - WING, (w + DESIGN_W) / 2].map((left) => {
     const wing = document.createElement("div");
-    Object.assign(wing.style, { position: "absolute", left: `${left}px`, width: `${WING}px`, background: "#000",
-      ...(side === "top" ? { top: `${drop}px`, bottom: 0 } : { top: 0, height: `${h - drop}px` }) });
+    Object.assign(wing.style, { position: "absolute", width: `${WING}px`, height: `${b - drop}px`, background: "#000", top: `${side === "top" ? drop : 0}px` });
+    wing.dataset.left = left;
     el.appendChild(wing);
-  }
+    return wing;
+  });
+  const fill = document.createElement("div");
+  fill.className = "dome-fill";
+  Object.assign(fill.style, { position: "absolute", background: "#000", opacity: 0 });
+  const c = { el, fill, side, b, h, top: 0, height: 0 };
+  c.size = () => {
+    const M = 300; // slack for a phone's address bar sliding away (the window grows without a re-fit)
+    const left = -view.ex - M, width = DESIGN_W + 2 * (view.ex + M);
+    c.top = -view.ey - M; c.height = DESIGN_H + 2 * (view.ey + M);
+    Object.assign(fill.style, { left: `${left}px`, width: `${width}px`, top: `${c.top}px`, height: `${c.height}px` });
+    Object.assign(el.style, { left: `${left}px`, width: `${width}px` });
+    cap.style.left = `${(DESIGN_W - w) / 2 - left}px`;
+    wings.forEach((wg) => { wg.style.left = `${Number(wg.dataset.left) + (DESIGN_W - w) / 2 - left}px`; });
+  };
+  c.sync = () => {
+    const y = gsap.getProperty(el, "y"), o = gsap.getProperty(el, "opacity");
+    const edge = side === "top" ? y + b - c.top : c.top + c.height - (y + h - b); // black starts below the arc / ends above it
+    const cut = Math.max(0, Math.min(c.height, edge - 3)); // tucked 3px under the arc, or a hairline shows at the seam
+    fill.style.clipPath = side === "top" ? `inset(${cut}px 0 0 0)` : `inset(0 0 ${cut}px 0)`;
+    fill.style.opacity = o;
+  };
+  c.size();
   gsap.set(el, { y: side === "top" ? DESIGN_H + 10 : -h - 10, opacity: 0 });
-  layers.domes.appendChild(el);
+  layers.domes.append(fill, el);
+  covers.push(c);
+  c.sync();
   return el;
 }
+gsap.ticker.add(() => covers.forEach((c) => c.sync()));
 
 /* ---------- timeline helpers ---------- */
 const tl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
@@ -779,6 +809,7 @@ if (qt !== null) {
   }
 }
 window.__tl = tl;
+window.__covers = covers; // for testing: covers.forEach((c) => c.sync()) after a tl.time() seek
 if (DIAG) gsap.ticker.add(() => diagNote(tl.time()));
 
 // the tuning panel is a design tool: it only appears with ?controls on the address
