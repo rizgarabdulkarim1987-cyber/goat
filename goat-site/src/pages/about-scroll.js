@@ -15,7 +15,7 @@ export function aboutScroll(page, rtl) {
   const $$ = (sel, root = page) => [...root.querySelectorAll(sel)];
 
   if (!phone) {
-    const lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
+    const lenis = new Lenis({ lerp: 0.085, smoothWheel: true });
     lenis.on("scroll", ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -56,7 +56,7 @@ export function aboutScroll(page, rtl) {
     // floating words: slide in from below, hold, then drift upward away; vertical ones come from the side
     parts('[data-m="word"]').forEach((el, i) => {
       const vertical = el.classList.contains("v") || el.classList.contains("vp");
-      into(el, vertical ? { opacity: 0, y: 70 } : { opacity: 0, y: 50, xPercent: i % 2 ? 8 : -8 }, { opacity: 1, y: 0, xPercent: 0 }, 0.02 + i * 0.03, 0.16);
+      into(el, vertical ? { opacity: 0, y: 110, filter: "blur(10px)" } : { opacity: 0, y: 70, xPercent: i % 2 ? 14 : -14, filter: "blur(10px)" }, { opacity: 1, y: 0, xPercent: 0, filter: "blur(0px)" }, 0.02 + i * 0.035, 0.2);
       away(el, { yPercent: 0 }, { yPercent: -140 - (i % 3) * 60 }, 0.2 + i * 0.03, 0.7);
     });
 
@@ -64,7 +64,15 @@ export function aboutScroll(page, rtl) {
     parts('[data-m="circ"]').forEach((el, i) => {
       into(el, { scale: 0.55, opacity: 0, filter: "blur(14px)" }, { scale: 1, opacity: 1, filter: "blur(0px)" }, 0.02 + i * 0.05, 0.22);
       away(el, { scale: 1, yPercent: 0 }, { scale: 1.1, yPercent: -6 }, 0.24 + i * 0.05, 0.7);
+      // the picture inside settles from a close-up while the circle opens, then drifts the other way
+      const img = el.querySelector("img");
+      if (img) {
+        into(img, { scale: 1.45 }, { scale: 1 }, 0.02 + i * 0.05, 0.4);
+        away(img, { scale: 1, yPercent: 0 }, { scale: 1.08, yPercent: 5 }, 0.3, 0.7);
+      }
     });
+    // the thin ring around a founder opens up, as if drawn
+    parts(".founder .orbit").forEach((el, i) => into(el, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1 }, 0.12 + i * 0.06, 0.25));
     parts('[data-m="dot"]').forEach((el, i) => {
       into(el, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1 }, 0.08 + i * 0.04, 0.14);
       away(el, { x: 0, y: 0 }, { y: (i % 2 ? -1 : 1) * 70, x: (i % 2 ? 1 : -1) * 40 }, 0.22, 0.7);
