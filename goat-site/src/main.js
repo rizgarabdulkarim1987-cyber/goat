@@ -251,25 +251,27 @@ function cover(side, b) {
     el.appendChild(wing);
     return wing;
   });
+  // the fill is a single pixel stretched by a transform: however much of the window it covers, it never needs a
+  // picture of its own (a window-sized black box, clipped each frame, was still enough to get the page killed on iOS)
   const fill = document.createElement("div");
   fill.className = "dome-fill";
-  Object.assign(fill.style, { position: "absolute", background: "#000", opacity: 0 });
-  const c = { el, fill, side, b, h, top: 0, height: 0 };
+  Object.assign(fill.style, { position: "absolute", left: 0, top: 0, width: "1px", height: "1px", background: "#000", opacity: 0, transformOrigin: "0 0" });
+  const c = { el, fill, side, b, h, left: 0, width: 0, top: 0, height: 0 };
   c.size = () => {
     const M = 300; // slack for a phone's address bar sliding away (the window grows without a re-fit)
-    const left = -view.ex - M, width = DESIGN_W + 2 * (view.ex + M);
+    c.left = -view.ex - M; c.width = DESIGN_W + 2 * (view.ex + M);
     c.top = -view.ey - M; c.height = DESIGN_H + 2 * (view.ey + M);
-    Object.assign(fill.style, { left: `${left}px`, width: `${width}px`, top: `${c.top}px`, height: `${c.height}px` });
-    Object.assign(el.style, { left: `${left}px`, width: `${width}px` });
-    cap.style.left = `${(DESIGN_W - w) / 2 - left}px`;
-    wings.forEach((wg) => { wg.style.left = `${Number(wg.dataset.left) + (DESIGN_W - w) / 2 - left}px`; });
+    Object.assign(el.style, { left: `${c.left}px`, width: `${c.width}px` });
+    cap.style.left = `${(DESIGN_W - w) / 2 - c.left}px`;
+    wings.forEach((wg) => { wg.style.left = `${Number(wg.dataset.left) + (DESIGN_W - w) / 2 - c.left}px`; });
   };
   c.sync = () => {
     const y = gsap.getProperty(el, "y"), o = gsap.getProperty(el, "opacity");
-    const edge = side === "top" ? y + b - c.top : c.top + c.height - (y + h - b); // black starts below the arc / ends above it
-    const cut = Math.max(0, Math.min(c.height, edge - 3)); // tucked 3px under the arc, or a hairline shows at the seam
-    fill.style.clipPath = side === "top" ? `inset(${cut}px 0 0 0)` : `inset(0 0 ${cut}px 0)`;
-    fill.style.opacity = o;
+    // black from 3px under the arc to the bottom of the window (top cover), or from the top of the window to 3px over the arc
+    const y0 = side === "top" ? y + b - 3 : c.top, y1 = side === "top" ? c.top + c.height : y + h - b + 3;
+    const hgt = Math.max(0, Math.min(y1, c.top + c.height) - Math.max(y0, c.top));
+    fill.style.transform = `translate(${c.left}px, ${Math.max(y0, c.top)}px) scale(${c.width}, ${hgt})`;
+    fill.style.opacity = hgt > 0 ? o : 0;
   };
   c.size();
   gsap.set(el, { y: side === "top" ? DESIGN_H + 10 : -h - 10, opacity: 0 });
