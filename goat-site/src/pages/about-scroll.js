@@ -1,8 +1,9 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 import Lenis from "lenis";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
 // About moves the way the home page does: a smooth scroller (Lenis) and tweens with no easing of their own, scrubbed by the
 // scroll. Words slide in and drift away, circles come into focus and grow, hairlines draw and are erased again, highlighter
@@ -76,13 +77,29 @@ export function aboutScroll(page, rtl) {
     });
     // the thin ring around a founder opens up, as if drawn
     parts(".founder .orbit").forEach((el, i) => into(el, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1 }, 0.12 + i * 0.06, 0.25));
-    parts('[data-m="dot"]').forEach((el, i) => {
+    // the black dots ride the head of a hairline as it draws, exactly as on the home page; the rings just soften in
+    const paths = parts(".hairs path");
+    const riders = parts(".dot");
+    riders.forEach((el, i) => {
+      const path = paths[i];
+      if (!path) {
+        into(el, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)" }, 0.08 + i * 0.04, 0.12);
+      } else {
+        const t0 = first ? 0.2 + i * 0.2 : 0.05 + i * 0.06, dur = first ? 1.6 : 0.4;
+        const ride = { motionPath: { path, align: path, alignOrigin: [0.5, 0.5], start: 0, end: 1 }, duration: dur };
+        if (first) { intro.set(el, { motionPath: { ...ride.motionPath, end: 0 }, opacity: 1 }, t0); intro.to(el, ride, t0); }
+        else { tl.set(el, { motionPath: { ...ride.motionPath, end: 0 }, opacity: 1 }, t0); tl.to(el, ride, t0); }
+      }
+      // then it slips away and fades, line and dot leaving together
+      away(el, { opacity: 1 }, { opacity: 0, y: `+=${(i % 2 ? -1 : 1) * 90}`, x: `+=${(i % 2 ? 1 : -1) * 60}`, duration: 0.5 }, 0.22, 0.5);
+    });
+    parts(".ring").forEach((el, i) => {
       into(el, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)" }, 0.08 + i * 0.04, 0.12);
-      away(el, { x: 0, y: 0, opacity: 1 }, { y: (i % 2 ? -1 : 1) * 120, x: (i % 2 ? 1 : -1) * 80, opacity: 0 }, 0.22, 0.6);
+      away(el, { opacity: 1 }, { opacity: 0 }, 0.3 + i * 0.03, 0.4);
     });
 
     // hairlines draw and erase, as on the home page
-    parts(".hairs path").forEach((p, i) => {
+    paths.forEach((p, i) => {
       const len = p.getTotalLength();
       gsap.set(p, { strokeDasharray: `${len} ${len * 4}`, strokeDashoffset: len });
       if (first) intro.to(p, { strokeDashoffset: 0, duration: 1.6 }, 0.2 + i * 0.2); else tl.to(p, { strokeDashoffset: 0, duration: 0.4 }, 0.05 + i * 0.06);
