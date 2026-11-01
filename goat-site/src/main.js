@@ -96,6 +96,12 @@ function fit() {
   const s = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H);
   design.style.setProperty("--s", s);
   document.documentElement.style.setProperty("--s", s); // the header is sized from it
+  // a phone shrinks the canvas with zoom, not transform: iOS rasterises a transform-scaled subtree at its full size times
+  // the screen density and only then scales it down, so every big element in it costs memory as if it were full size
+  if (matchMedia("(max-width: 820px)").matches && !OFF.has("zoom")) {
+    design.style.zoom = s;
+    design.style.transform = "translate(-50%, -50%)";
+  }
   view = { ex: Math.max(0, (innerWidth / s - DESIGN_W) / 2), ey: Math.max(0, (innerHeight / s - DESIGN_H) / 2) };
   covers.forEach((c) => { c.size(); c.sync(); });
 }
