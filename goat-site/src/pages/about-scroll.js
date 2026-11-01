@@ -16,7 +16,7 @@ export function aboutScroll(page, rtl) {
   const $$ = (sel, root = page) => [...root.querySelectorAll(sel)];
 
   if (!phone) {
-    const lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
+    const lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9, smoothWheel: true });
     lenis.on("scroll", ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -33,7 +33,7 @@ export function aboutScroll(page, rtl) {
 
   if (phone) {
     // one gentle rise per thing, tied to the scroll
-    $$("[data-m]").forEach((el) => gsap.fromTo(el, { opacity: 0, y: 36 }, { opacity: 1, y: 0, ease: "none", scrollTrigger: { trigger: el, start: "top 98%", end: "top 72%", scrub: 0.5 } }));
+    $$("[data-m]").forEach((el) => gsap.fromTo(el, { opacity: 0, y: 14, filter: "blur(3px)" }, { opacity: 1, y: 0, filter: "blur(0px)", ease: "power2.out", scrollTrigger: { trigger: el, start: "top 98%", end: "top 72%", scrub: 0.6 } }));
     $$(".hl").forEach((el) => gsap.fromTo(el, { "--w": "0%" }, { "--w": "100%", ease: "none", scrollTrigger: { trigger: el, start: "top 90%", end: "top 62%", scrub: 0.5 } }));
     countUp(page, $$);
     return;
@@ -42,18 +42,18 @@ export function aboutScroll(page, rtl) {
   $$(".scene").forEach((scene, idx) => {
     // the first scene is already on screen when the page opens: it plays in on its own, and only drifts away with the scroll
     const first = idx === 0;
-    const tl = gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: scene, start: first ? "top top" : "top 90%", end: first ? "bottom top" : "bottom 15%", scrub: 1 } });
+    const tl = gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: scene, start: first ? "top top" : "top 90%", end: first ? "bottom top" : "bottom 15%", scrub: 1.2 } });
     const intro = first ? gsap.timeline({ defaults: { ease: "power2.out" } }) : null;
     // `into` is an entrance (time-based on the first scene, scrubbed on the others); `away` is the drift that follows
-    const into = (el, from, to, at, dur) => (first ? intro.fromTo(el, from, { ...to, duration: dur * 5 }, at * 4) : tl.fromTo(el, from, { ...to, duration: dur }, at));
+    const into = (el, from, to, at, dur) => (first ? intro.fromTo(el, from, { ...to, duration: dur * 5 }, at * 4) : tl.fromTo(el, from, { ...to, duration: dur, ease: "power3.out" }, at));
     // everything rests exactly where the design puts it while the scene is centred (about 0.4 to 0.6 of the scrub); only after that does it drift off
     const rest = first ? 0.12 : 0.62;
-    const away = (el, from, to, at, dur) => tl.fromTo(el, from, { ...to, duration: Math.min(dur, 0.38), immediateRender: false }, rest + Math.min(at, 0.4) * 0.1);
+    const away = (el, from, to, at, dur) => tl.fromTo(el, from, { ...to, duration: Math.min(dur, 0.38), immediateRender: false, ease: "power2.in" }, rest + Math.min(at, 0.4) * 0.1);
     const parts = (sel) => $$(sel, scene);
 
     // the big titles are uncovered by a wipe
     parts('[data-m="title"]').forEach((el, i) => {
-      into(el, { clipPath: start, opacity: 0.2 }, { clipPath: "inset(0 0% 0 0)", opacity: 1 }, 0.04 + i * 0.05, 0.18);
+      into(el, { clipPath: start, opacity: 0.2, yPercent: 16 }, { clipPath: "inset(0 0% 0 0)", opacity: 1, yPercent: 0 }, 0.04 + i * 0.05, 0.18);
       away(el, { opacity: 1 }, { opacity: 0 }, 0.3 + i * 0.03, 0.4);
     });
 
@@ -102,7 +102,7 @@ export function aboutScroll(page, rtl) {
     paths.forEach((p, i) => {
       const len = p.getTotalLength();
       gsap.set(p, { strokeDasharray: `${len} ${len * 4}`, strokeDashoffset: len });
-      if (first) intro.to(p, { strokeDashoffset: 0, duration: 1.6 }, 0.2 + i * 0.2); else tl.to(p, { strokeDashoffset: 0, duration: 0.4 }, 0.05 + i * 0.06);
+      if (first) intro.to(p, { strokeDashoffset: 0, duration: 1.6 }, 0.2 + i * 0.2); else tl.to(p, { strokeDashoffset: 0, duration: 0.4, ease: "power1.inOut" }, 0.05 + i * 0.06);
       tl.to(p, { opacity: 0, duration: 0.25 }, rest + 0.05 + i * 0.02);
     });
 
@@ -120,9 +120,25 @@ export function aboutScroll(page, rtl) {
     parts(".hill path").forEach((p, i) => tl.fromTo(p, { yPercent: 18 + i * 8 }, { yPercent: 0, duration: 0.3 }, 0.02 + i * 0.05));
     parts('[data-m="stop"]').forEach((el, i) => tl.fromTo(el, { opacity: 0, scale: 0.2, y: 24 }, { opacity: 1, scale: 1, y: 0, duration: 0.1 }, 0.12 + i * 0.05));
 
+    // depth: every layer glides at its own pace through the whole scene, and sits exactly on its design spot when the scene is centred
+    const glide = (els, amount) => els.forEach((el, i) => gsap.fromTo(el, { "--py": amount(i) }, { "--py": -amount(i), ease: "none", scrollTrigger: { trigger: scene, start: "top bottom", end: "bottom top", scrub: 0.9 } }));
+    glide(parts('[data-m="circ"]'), (i) => (i % 2 ? -1 : 1) * (34 + (i % 3) * 14));
+    glide(parts('[data-m="giant"]'), () => 28);
+    glide(parts('[data-m="title"]'), () => 16);
+    glide(parts('[data-m="word"]'), (i) => (i % 2 ? 1 : -1) * (10 + (i % 4) * 7));
+
     // the team and the clients pop in one after the other
     parts('[data-m="team"]').forEach((list) => tl.fromTo([...list.children], { opacity: 0, scale: 0.6, y: 30 }, { opacity: 1, scale: 1, y: 0, stagger: 0.04, duration: 0.2 }, 0.12));
   });
+
+  // buttons lean towards the pointer
+  if (matchMedia("(hover: hover)").matches) {
+    $$(".btn-red, .btn-ink").forEach((el) => {
+      const mx = gsap.quickTo(el, "--mx", { duration: 0.6, ease: "power3.out" }), my = gsap.quickTo(el, "--my", { duration: 0.6, ease: "power3.out" });
+      el.addEventListener("pointermove", (e) => { const r = el.getBoundingClientRect(); mx((e.clientX - r.left - r.width / 2) * 0.28); my((e.clientY - r.top - r.height / 2) * 0.4); });
+      el.addEventListener("pointerleave", () => { mx(0); my(0); });
+    });
+  }
 
   countUp(page, $$);
   addEventListener("load", () => ScrollTrigger.refresh());
