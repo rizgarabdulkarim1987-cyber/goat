@@ -4,34 +4,39 @@ import Lenis from "lenis";
 import { mountPanel } from "./panel.js";
 import { SEQ as STATIC_SEQ } from "./seq.js";
 import { loadSeq, loadCounters, loadContent } from "./clips.js";
+import { API } from "./api.js";
 import { rtl, t, langSwitch } from "./lang.js";
+const apiUrl = (p) => API + p;
 
 gsap.registerPlugin(ScrollTrigger);
+// a phone's address bar sliding away is a height-only resize: ScrollTrigger must not re-measure everything for it
+ScrollTrigger.config({ ignoreMobileResize: true });
 // phones: no forced 3D layers; the big black wipes would each get a layer of tens of megapixels, which an iPhone kills the page for
 if (matchMedia("(max-width: 820px)").matches) gsap.config({ force3D: false });
 
 // ?cmp=1&t=N: frame-capture mode for compare.py — no scrolling, no smoothing, no panel
 const params = new URLSearchParams(location.search);
 const CMP = params.get("cmp") === "1";
-// ?diag: a small read-out of the film time, written to storage every frame so that after a crash the page can say where it died;
-// ?nofilm: the picture clips are left empty (is it the pictures at all?)
+// ?diag: a small read-out of the film time, beaconed to the backend every half second (a beacon leaves the browser even when
+// the page is killed right after, which storage on an iPhone does not); ?nofilm: the picture clips are left empty;
+// ?off=lenis,domes,blend,svg,text: parts of the page switched off one by one, to find the one a phone cannot hold
 const DIAG = params.has("diag"), NOFILM = params.has("nofilm");
+const OFF = new Set((params.get("off") || "").split(",").filter(Boolean));
 let diagNote = () => {};
 if (DIAG) {
   const box = document.createElement("pre");
   box.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:9999;margin:0;padding:8px 10px;background:#ff0;color:#000;font:bold 15px/1.3 monospace;pointer-events:none;white-space:pre-wrap;max-width:90vw";
   document.body.append(box);
-  let last = "";
-  try { last = localStorage.getItem("goat-diag") || ""; } catch {}
-  const first = last ? `LAST RUN (before crash):\n${last}\n` : "";
-  let held = 0;
+  const run = Math.random().toString(36).slice(2, 6), tag = [NOFILM && "nofilm", ...OFF].filter(Boolean).join("+") || "full";
+  let held = 0, sent = 0, maxT = 0;
   diagNote = (t) => {
-    const mem = performance.memory ? ` heap ${Math.round(performance.memory.usedJSHeapSize / 1e6)}MB` : "";
-    const line = `t ${t.toFixed(1)}s  scroll ${Math.round(scrollY)}  frames ${held}${mem}  ${innerWidth}x${innerHeight} dpr ${devicePixelRatio}`;
-    box.textContent = first + "NOW: " + line;
-    try { localStorage.setItem("goat-diag", line); } catch {}
+    maxT = Math.max(maxT, t);
+    const line = `[${run} ${tag}] t ${t.toFixed(1)}s (max ${maxT.toFixed(1)})  scroll ${Math.round(scrollY)}  frames ${held}  ${innerWidth}x${innerHeight} dpr ${devicePixelRatio}`;
+    box.textContent = line;
+    if (performance.now() - sent > 500) { sent = performance.now(); try { navigator.sendBeacon(apiUrl("/api/diag"), line); } catch {} }
   };
   addEventListener("goat-frame", (e) => { held = e.detail; });
+  addEventListener("pagehide", () => { try { navigator.sendBeacon(apiUrl("/api/diag"), `[${run} ${tag}] pagehide at max ${maxT.toFixed(1)}`); } catch {} });
 }
 
 // The circle clips (plant, runners, eye) and the end counters come from the backend; if it is down the
@@ -79,6 +84,11 @@ const layers = {
 };
 
 const design = document.getElementById("design");
+if (OFF.has("domes")) layers.domes.style.display = "none";
+if (OFF.has("svg")) { layers.a.style.display = "none"; layers.lines.style.display = "none"; }
+if (OFF.has("text")) { layers.main.style.display = "none"; layers.top.style.display = "none"; }
+if (OFF.has("blend")) document.getElementById("ui").style.mixBlendMode = "normal";
+if (OFF.has("all")) design.style.display = "none";
 // The whole canvas is always in view (phones show it small, with the scene's colour carrying on above and below).
 function fit() {
   const s = Math.min(innerWidth / DESIGN_W, innerHeight / DESIGN_H);
@@ -749,7 +759,7 @@ function bind() {
 bind();
 addEventListener("resize", onResize(sizeSpace));
 
-const lenis = CMP ? null : new Lenis({ lerp: 0.12, smoothWheel: true });
+const lenis = CMP || OFF.has("lenis") ? null : new Lenis({ lerp: 0.12, smoothWheel: true });
 if (lenis) {
   lenis.on("scroll", ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));

@@ -83,6 +83,15 @@ app.get("/api", (req, res) => res.json({
 }));
 app.get("/api/health", (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
+// a phone's ?diag read-out, beaconed every half second: the last lines are kept in memory so a crash on a phone can be read from here
+const diag = [];
+app.post("/api/diag", express.text({ limit: "2kb", type: "*/*" }), (req, res) => {
+  diag.push(`${new Date().toISOString().slice(11, 19)} ${String(req.body).slice(0, 300)}`);
+  if (diag.length > 400) diag.splice(0, diag.length - 400);
+  res.status(204).end();
+});
+app.get("/api/diag", (req, res) => res.type("text/plain").send(diag.join("\n")));
+
 /* ---------- circle frame sequences ---------- */
 // frames live in data/frames/<clip>/0000.jpg ...; clips.json holds the metadata bake.py wrote.
 // kind "frames": one jpg per frame. kind "sheet": one sprite sheet (the headline, hill and walking goat).
