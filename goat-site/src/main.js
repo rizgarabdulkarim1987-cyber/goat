@@ -13,6 +13,26 @@ if (matchMedia("(max-width: 820px)").matches) gsap.config({ force3D: false });
 // ?cmp=1&t=N: frame-capture mode for compare.py — no scrolling, no smoothing, no panel
 const params = new URLSearchParams(location.search);
 const CMP = params.get("cmp") === "1";
+// ?diag: a small read-out of the film time, written to storage every frame so that after a crash the page can say where it died;
+// ?nofilm: the picture clips are left empty (is it the pictures at all?)
+const DIAG = params.has("diag"), NOFILM = params.has("nofilm");
+let diagNote = () => {};
+if (DIAG) {
+  const box = document.createElement("pre");
+  box.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:9999;margin:0;padding:8px 10px;background:#ff0;color:#000;font:bold 15px/1.3 monospace;pointer-events:none;white-space:pre-wrap;max-width:90vw";
+  document.body.append(box);
+  let last = "";
+  try { last = localStorage.getItem("goat-diag") || ""; } catch {}
+  const first = last ? `LAST RUN (before crash):\n${last}\n` : "";
+  let held = 0;
+  diagNote = (t) => {
+    const mem = performance.memory ? ` heap ${Math.round(performance.memory.usedJSHeapSize / 1e6)}MB` : "";
+    const line = `t ${t.toFixed(1)}s  scroll ${Math.round(scrollY)}  frames ${held}${mem}  ${innerWidth}x${innerHeight} dpr ${devicePixelRatio}`;
+    box.textContent = first + "NOW: " + line;
+    try { localStorage.setItem("goat-diag", line); } catch {}
+  };
+  addEventListener("goat-frame", (e) => { held = e.detail; });
+}
 
 // The circle clips (plant, runners, eye) and the end counters come from the backend; if it is down the
 // static sprite sheets and 24s are used. Only the picture source and the counter values depend on this:
@@ -132,7 +152,9 @@ function clip(name, o = {}) {
   (o.layer || layers.main).appendChild(el);
   const st = { f: 0 };
   let draw;
-  if (m.frameSet) {
+  if (NOFILM) {
+    draw = () => {};
+  } else if (m.frameSet) {
     // frames served one by one by the backend: drawn on a canvas, so a frame swap never flickers
     const cv = document.createElement("canvas");
     const lite = matchMedia("(max-width: 820px)").matches ? 0.5 : 1; // a phone gets half-size canvases: a quarter of the memory
@@ -747,6 +769,7 @@ if (qt !== null) {
   }
 }
 window.__tl = tl;
+if (DIAG) gsap.ticker.add(() => diagNote(tl.time()));
 
 // the tuning panel is a design tool: it only appears with ?controls on the address
 if (!CMP && params.has("controls")) mountPanel({

@@ -18,11 +18,12 @@ const KEEP = LITE ? 6 : 10;
 // On a phone a frame is decoded as an ImageBitmap at half size and closed when it is dropped: iOS keeps the pixels of
 // an <img> in its own cache after src is cleared, so dropping those never gave the memory back and the tab was killed.
 const BITMAPS = LITE && typeof createImageBitmap === "function";
+let held = 0; // decoded frames alive right now, across every clip (shown by ?diag)
 function makeFrames(meta, keepAll = false) {
   const images = new Array(meta.n);
   const listeners = new Set();
   let cur = 0;
-  const drop = (k) => { const e = images[k]; images[k] = undefined; if (e.img instanceof Image) e.img.src = ""; else e.img?.close?.(); };
+  const drop = (k) => { const e = images[k]; images[k] = undefined; if (e.img instanceof Image) e.img.src = ""; else e.img?.close?.(); held -= 1; };
   const evict = () => {
     if (keepAll) return;
     const have = [];
@@ -34,7 +35,7 @@ function makeFrames(meta, keepAll = false) {
   const load = (i) => {
     if (images[i]) return images[i].done;
     const entry = { img: null, ok: false };
-    const arrived = () => { entry.ok = true; evict(); listeners.forEach((f) => f(i)); return true; };
+    const arrived = () => { entry.ok = true; evict(); listeners.forEach((f) => f(i)); held += 1; dispatchEvent(new CustomEvent("goat-frame", { detail: held })); return true; };
     const failed = () => { setTimeout(() => { if (images[i] === entry) images[i] = undefined; }, 700); return false; }; // a frame the host refused is asked for again, not given up on
     if (BITMAPS) {
       entry.done = fetch(meta.frames[i]).then((r) => (r.ok ? r.blob() : Promise.reject()))
