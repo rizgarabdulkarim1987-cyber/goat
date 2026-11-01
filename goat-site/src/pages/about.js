@@ -1,27 +1,163 @@
 import { api } from "../api.js";
 import { t, rtl } from "../lang.js";
-import { loadCounters } from "../clips.js";
-import { h, vlabel, mount } from "./dom.js";
-import { mountShell, pageHead, homeLink } from "./shell.js";
+import { loadContent, loadCounters } from "../clips.js";
+import { h, mount } from "./dom.js";
+import { mountShell } from "./shell.js";
 import { aboutScroll } from "./about-scroll.js";
 
-const page = mountShell("about", { theme: "dark" });
-const body = h("div");
-page.append(pageHead(t("nav.about", "about")), body, homeLink());
+// About follows the design file scene by scene. Each scene is a 1438 x 960 stage like the home page's (x, y and sizes below
+// are design pixels; --cu turns them into screen pixels). On a phone the stage becomes a plain flowing column.
+// Every word, picture and list comes from the backend: the words from the Words tab (about.*), the pictures from Pictures
+// (aboutHero ...), the team from Work, blog, team, the clients from the work list, the numbers from Numbers.
+const content = await loadContent();
+const pic = (key) => content?.images?.[key] || "";
+const SVG = "http://www.w3.org/2000/svg";
 
-await mount(body, async () => {
-  const [about, counters] = await Promise.all([api("/api/about"), loadCounters()]);
-  // every second section is a white band across the page, like the long About strip in the design file
-  let n = 0;
-  const sec = (label, ...kids) => h("section", { class: `sec${n++ % 2 ? " light" : ""}` }, vlabel(label), h("div", null, ...kids));
-  // a team member: the photo in a circle, or the first letter in a ring until a photo is added in the admin page
+const page = mountShell("about", { theme: "light" });
+const root = h("div");
+page.append(root);
+
+const at = (x, y, extra = "") => `--x:${x};--y:${y}${extra}`;
+// a word floating on the stage; `v` makes it vertical (it reads top to bottom, as in the design)
+const fw = (key, def, x, y, { v = false, size, cls = "" } = {}) => h("span", { class: `fw${v ? " v" : ""} ${cls}`, "data-m": "word", style: at(x, y, size ? `;--fs:${size}` : "") }, t(key, def));
+const circ = (src, x, y, d, cls = "") => h("div", { class: `circ ${cls}`, "data-m": "circ", style: at(x, y, `;--d:${d}`) }, src ? h("img", { src, alt: "", loading: "lazy", decoding: "async" }) : null);
+const dot = (x, y, d, cls = "") => h("span", { class: `dot ${cls}`, "data-m": "dot", style: at(x, y, `;--d:${d}`), "aria-hidden": "true" });
+const mark = (key, def, color) => h("mark", { class: `hl hl-${color}`, "data-m": "hl" }, t(key, def));
+// hairline curves across the stage that draw themselves and are erased again by the scroll, as on the home page
+const hairs = (...paths) => {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("class", "hairs");
+  svg.setAttribute("viewBox", "0 0 1438 960");
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("aria-hidden", "true");
+  for (const d of paths) { const p = document.createElementNS(SVG, "path"); p.setAttribute("d", d); svg.append(p); }
+  return svg;
+};
+const scene = (cls, ...kids) => h("section", { class: `scene ${cls}` }, ...kids);
+const stage = (...kids) => h("div", { class: "stage" }, ...kids);
+const photo = (key) => h("div", { class: "bg", "aria-hidden": "true" }, pic(key) ? h("img", { src: pic(key), alt: "", loading: "lazy", decoding: "async", "data-m": "bg" }) : null);
+
+await mount(root, async () => {
+  const [about, counters, works] = await Promise.all([api("/api/about"), loadCounters(), api("/api/work").catch(() => [])]);
+  const team = about.team || [];
+  const clients = [...new Set(works.map((w) => w.client).filter(Boolean))];
   const avatar = (m) => h("span", { class: "avatar", "aria-hidden": "true" }, m.photo ? h("img", { src: m.photo, alt: "", loading: "lazy", decoding: "async" }) : Array.from(m.name)[0]);
-  return h("div", null,
-    sec(t("ui.about.hello", "hello"), h("h2", { class: "h2" }, about.headline), h("p", { class: "p" }, about.intro),
-      h("ul", { class: "chips values", "aria-label": t("ui.about.values", "what we care about") }, about.values.map((v) => h("li", { class: "chip" }, v)))),
-    about.sections.map((s) => sec(s.label, h("h2", { class: "h2" }, s.title), h("p", { class: "p" }, s.text))),
-    about.team.length > 0 && sec(t("ui.about.team", "team"), h("ul", { class: "team" }, about.team.map((m) => h("li", null, avatar(m), h("span", { class: "name" }, m.name), h("span", { class: "small muted" }, m.role))))),
-    counters && sec(t("ui.about.numbers", "numbers"), h("ul", { class: "stats" }, [["Prject", "projects"], ["client", "clients"], ["staff", "staff"], ["years", "years"]]
-      .map(([k, cap]) => h("li", null, h("span", { class: "num" }, String(counters[k])), h("span", { class: "cap" }, t(`ui.stat.${cap}`, cap)))))));
+
+  // 1 / creativity
+  const s1 = scene("s1", stage(
+    h("h1", { class: "vt t1", "data-m": "title", style: at(640, 110) }, t("about.s1.title", "creativity")),
+    circ(pic("aboutHero"), 745, 215, 370),
+    fw("about.s1.w1", "belongs", 390, 246), fw("about.s1.w2", "higher", 483, 540, { v: true }),
+    fw("about.s1.w3", "on", 1213, 300, { v: true }), fw("about.s1.w4", "grounds", 1049, 700),
+    hairs("M -20 700 C 160 560 360 540 560 600 S 880 760 1040 720 S 1250 560 1180 480", "M -20 760 C 140 640 300 620 480 660")));
+
+  // 2 / we do dare
+  const s2 = scene("s2", stage(
+    h("div", { class: "circ dark-circ", "data-m": "circ", style: at(457, 207, ";--d:524") },
+      h("p", { class: "statement" }, t("about.s2.l1", "Some follow the path."), h("br"), mark("about.s2.l2", "We climb.", "red"), h("br"), t("about.s2.l3", "Some play it safe."), h("br"), mark("about.s2.l4", "We jump.", "red"))),
+    fw("about.s2.w1", "we", 350, 170, { v: true }), fw("about.s2.w2", "do", 1085, 470, { v: true }), fw("about.s2.w3", "dare", 740, 820),
+    dot(1020, 246, 80), dot(330, 440, 50),
+    hairs("M 640 -20 C 700 80 720 160 700 230", "M 1040 250 C 1200 150 1340 220 1460 320", "M -20 520 C 120 560 240 500 330 460")));
+
+  // 3 / goat, the greatest of all time (a photograph, the word on top of it)
+  const s3 = scene("s3 photo curve", photo("aboutOffice"), stage(
+    h("span", { class: "giant", "data-m": "giant", style: at(300, 250) }, "goat"),
+    fw("about.s3.w1", "we", 330, 200), fw("about.s3.g1", "the greatest", 560, 120, { v: true, cls: "bold" }),
+    fw("about.s3.g2", "of all time", 820, 560, { v: true, cls: "bold" }), fw("about.s3.w2", "are", 1190, 520, { v: true }),
+    h("p", { class: "caption", "data-m": "word", style: at(930, 640) }, mark("about.s3.caphl", "A kick-ass creative agency", "red"), " ", t("about.s3.cap", "based in Sulaymaniyah, Iraq. Dreaming big and making waves since 2020.")),
+    hairs("M -20 760 C 300 640 560 820 880 700 S 1300 560 1460 640")));
+
+  // 4 / two wild goats: the founders, from the team list
+  const names = team.slice(0, 2);
+  const glow = ["red", "purple"];
+  const nameAt = [[210, 130], [960, 200]];
+  const s4 = scene("s4", stage(
+    h("h2", { class: "mid-title", "data-m": "title", style: at(0, 440) }, t("about.s4.title", "two wild goats")),
+    h("p", { class: "vp", "data-m": "word", style: at(540, 40) }, t("about.s4.p1", "")),
+    h("p", { class: "vp", "data-m": "word", style: at(780, 560) }, t("about.s4.p2", "")),
+    names.map((m, i) => h("span", { class: `founder glow-${glow[i]}`, "data-m": "word", style: at(nameAt[i][0], nameAt[i][1]) }, h("span", { class: "orbit" }), h("span", { class: "fname v" }, m.name))),
+    hairs("M 330 230 C 200 330 120 520 220 640 S 520 860 780 820", "M 1060 200 C 980 380 1180 500 1300 640 S 1100 880 800 840")));
+
+  // 5 / they climbed (photograph of the founders)
+  const s5 = scene("s5 photo", photo("aboutFounders"), stage(
+    h("h2", { class: "vt t5", "data-m": "title", style: at(300, 130) }, t("about.s5.title", "they climbed")),
+    h("p", { class: "caption wide", "data-m": "word", style: at(450, 520) }, t("about.s5.p", "")),
+    fw("about.s5.w1", "design", 680, 90), fw("about.s5.w2", "motion", 470, 780), fw("about.s5.w3", "camera", 1010, 600, { v: true }),
+    h("span", { class: "ring", "data-m": "dot", style: at(640, 140, ";--d:150") }), h("span", { class: "ring", "data-m": "dot", style: at(790, 330, ";--d:130") }), h("span", { class: "ring", "data-m": "dot", style: at(1010, 360, ";--d:130") })));
+
+  // 6 / a place built for ideas
+  const s6 = scene("s6", stage(
+    h("h2", { class: "place l1", "data-m": "title", style: at(400, 150) }, t("about.s6.l1", "a place")),
+    h("h2", { class: "place l2", "data-m": "title", style: at(470, 270) }, t("about.s6.l2", "built for ideas")),
+    h("p", { class: "vp", "data-m": "word", style: at(1260, 40) }, t("about.s6.p1", "")), h("p", { class: "vp", "data-m": "word", style: at(1130, 440) }, t("about.s6.p2", "")),
+    h("a", { class: "btn-red", "data-m": "word", href: "#the-climb", style: at(810, 520) }, t("about.s6.btn", "read more")),
+    circ(pic("aboutSpace1"), 440, 380, 150), circ(pic("aboutSpace2"), 700, 560, 210), circ(pic("aboutSpace3"), 200, 640, 330)));
+
+  // 7 / the workspace in big circles
+  const s7 = scene("s7", stage(circ(pic("aboutSpace3"), 760, 40, 500), circ(pic("aboutSpace1"), 250, 380, 290), hairs("M 100 120 C 300 40 520 220 700 160")));
+
+  // 8 / the climb: three columns and a timeline on a black hill
+  const years = [1, 2, 3, 4, 5, 6, 7];
+  const hill = (() => {
+    const svg = document.createElementNS(SVG, "svg");
+    svg.setAttribute("class", "hill");
+    svg.setAttribute("viewBox", "0 0 1438 960");
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.setAttribute("aria-hidden", "true");
+    for (const [fill, d] of [["#d4d4d4", "M 0 700 C 220 640 380 700 620 640 S 900 430 1120 420 S 1340 260 1438 200 L 1438 960 L 0 960 Z"], ["#9a9a9a", "M 0 770 C 220 720 420 790 640 700 S 940 500 1160 470 S 1340 340 1438 290 L 1438 960 L 0 960 Z"], ["#000", "M 0 820 C 200 780 420 820 660 740 S 960 560 1180 520 S 1340 420 1438 370 L 1438 960 L 0 960 Z"]]) {
+      const p = document.createElementNS(SVG, "path"); p.setAttribute("d", d); p.setAttribute("fill", fill); svg.append(p);
+    }
+    return svg;
+  })();
+  const stops = [[150, 790], [350, 790], [560, 725], [760, 650], [960, 580], [1140, 520], [1310, 450]];
+  const s8 = scene("s8", stage(
+    h("h2", { class: "climb-title", "data-m": "title", style: at(250, 10) }, t("about.s8.title", "the climb")),
+    h("p", { class: "col", "data-m": "word", style: at(250, 200) }, t("about.s8.c1", "")),
+    h("p", { class: "col", "data-m": "word", style: at(540, 200) }, t("about.s8.c2", "")),
+    h("p", { class: "col", "data-m": "word", style: at(830, 200) }, mark("about.s8.h1", "It pushed us higher.", "red"), h("br"), mark("about.s8.h2", "It made us sharper.", "red"), h("br"), mark("about.s8.h3", "It's just getting started.", "red")),
+    hill, years.map((n, i) => h("span", { class: "stop", "data-m": "stop", style: at(stops[i][0], stops[i][1]) }, h("span", { class: "pt" }), h("span", { class: "yr v" }, t(`about.tl.${n}`, String(2019 + n))))),
+    h("span", { class: "ring", "data-m": "dot", style: at(1080, 820, ";--d:56") })));
+  s8.id = "the-climb";
+
+  // 9 / the herd (black)
+  const s9 = scene("s9 dark curve", stage(
+    circ(pic("aboutHerd"), 250, 110, 470, "gray"),
+    h("h2", { class: "herd-title", "data-m": "title", style: at(880, 330) }, t("about.s9.title", "the herd")),
+    h("p", { class: "small-p", "data-m": "word", style: at(880, 40) }, t("about.s9.a", ""), " ", mark("about.s9.hl1", "We look for passion.", "blue"), h("br"), h("br"), t("about.s9.b", "")),
+    h("p", { class: "small-p", "data-m": "word", style: at(880, 470) }, t("about.s9.c", ""), " ", mark("about.s9.hl2", "love what they do.", "blue"), h("br"), t("about.s9.d", "")),
+    h("a", { class: "btn-red", "data-m": "word", href: "#the-team", style: at(880, 770) }, t("about.s9.btn", "Meet the Herd")),
+    h("span", { class: "ring", "data-m": "dot", style: at(130, 130, ";--d:140") }), h("span", { class: "ring", "data-m": "dot", style: at(180, 680, ";--d:110") }), h("span", { class: "ring", "data-m": "dot", style: at(1330, 590, ";--d:56") })));
+
+  // 9b / climbed with us: everyone in the team list
+  const s9b = scene("s9b dark", h("div", { class: "flow", id: "the-team" },
+    h("h2", { class: "mid-title big", "data-m": "title" }, t("about.s9.team", "climbed with us")),
+    team.length ? h("ul", { class: "team", "data-m": "team" }, team.map((m) => h("li", null, avatar(m), h("span", { class: "name" }, m.name), h("span", { class: "small muted" }, m.role)))) : null));
+
+  // 10 / the clients and one voice
+  const s10 = scene("s10 dark", h("div", { class: "flow" },
+    clients.length ? h("ul", { class: "clients", "aria-label": t("about.s10.title", "trusted by"), "data-m": "team" }, clients.map((c) => h("li", null, c))) : null,
+    h("figure", { class: "quote", "data-m": "word" }, circ(pic("aboutQuote"), 0, 0, 150, "gray inline"),
+      h("figcaption", null, h("strong", { class: "q-name" }, t("about.s10.name", "Ali Shawkat")), h("span", { class: "q-role" }, t("about.s10.role", "marketing manager")), h("blockquote", { class: "q-text" }, t("about.s10.quote", ""))))));
+
+  // 11 / ready to climb with us
+  const s11 = scene("s11", stage(
+    fw("about.s11.w1", "ready", 390, 150), fw("about.s11.w2", "to", 350, 330, { v: true }), fw("about.s11.w3", "with", 1010, 235), fw("about.s11.w4", "us", 1160, 540, { v: true }),
+    h("span", { class: "giant ink", "data-m": "giant", style: at(250, 230) }, t("about.s11.big", "climb")),
+    h("p", { class: "small-p", "data-m": "word", style: at(560, 470) }, t("about.s11.a", ""), " ", mark("about.s11.hl1", "build a brand, launch a campaign", "yellow"), " ", t("about.s11.b", "or"), " ", mark("about.s11.hl2", "join a team", "yellow"), " ", t("about.s11.c", ""), " ", mark("about.s11.hl3", "They climb.", "yellow")),
+    h("a", { class: "btn-red", "data-m": "word", href: "/contact.html", style: at(560, 700) }, t("about.s11.btn1", "Work With Us")), h("a", { class: "btn-ink", "data-m": "word", href: "/contact.html", style: at(720, 700) }, t("about.s11.btn2", "Join the Herd")),
+    dot(1080, 340, 50, "blurred"), dot(1015, 600, 50), dot(40, 480, 110),
+    hairs("M 760 -20 C 900 100 1020 80 1080 340", "M 1150 250 C 1300 330 1340 480 1060 600", "M -20 560 C 160 520 360 420 700 330")));
+
+  // 12 / the end: hire us, the numbers, the links
+  const stat = (k, cap) => h("li", null, h("span", { class: "num" }, String(counters?.[k] ?? 0)), h("span", { class: "cap" }, t(`ui.stat.${cap}`, cap)));
+  const s12 = scene("s12 dark curve", h("div", { class: "flow end" },
+    h("h2", { class: "hire", "data-m": "title" }, t("about.s12.title", "do you want to hire goat?")),
+    h("p", { class: "sub", "data-m": "word" }, t("about.s12.sub", "")),
+    h("a", { class: "btn-red", "data-m": "word", href: "/contact.html" }, t("about.s12.btn", "get in touch")),
+    counters ? h("ul", { class: "stats", "data-m": "stats" }, [["Prject", "projects"], ["client", "clients"], ["staff", "staff"], ["years", "years"]].map(([k, c]) => stat(k, c))) : null,
+    h("nav", { class: "foot-links", "aria-label": "footer" }, [["about", "/about.html"], ["work", "/work.html"], ["contact", "/contact.html"], ["blog", "/blog.html"]].map(([k, href]) => h("a", { href }, t(`nav.${k}`, k))))));
+
+  return h("div", { class: "about" }, s1, s2, s3, s4, s5, s6, s7, s8, s9, s9b, s10, s11, s12);
 });
+
 aboutScroll(page, rtl);

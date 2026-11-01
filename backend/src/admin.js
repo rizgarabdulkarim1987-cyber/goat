@@ -40,6 +40,8 @@ export function mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin
   app.get("/api/admin/check", admin, (req, res) => res.json({ ok: true }));
 
   /* ---------- every word on the home page ---------- */
+  // the pictures a newer deploy ships (media.about.json) sit underneath the ones edited here (media.json)
+  const readMedia = async () => ({ ...(await readJson("media.about.json").catch(() => ({}))), ...(await readJson("media.json")) });
   const mediaUrl = async (req, file) => {
     const s = await stat(path.join(DATA, "media", file));
     return `${origin(req)}/media/${file}?v=${Math.round(s.mtimeMs)}`;
@@ -57,7 +59,7 @@ export function mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin
   };
   app.get("/api/content", wrap(async (req, res) => {
     const lang = langOf(req);
-    const [texts, media] = await Promise.all([readTexts(lang, false), readJson("media.json")]);
+    const [texts, media] = await Promise.all([readTexts(lang, false), readMedia()]);
     const images = {};
     for (const [key, file] of Object.entries(media)) images[key] = await mediaUrl(req, file);
     res.json({ lang, dir: lang === "en" ? "ltr" : "rtl", langs: LANGS, texts, images });
@@ -80,7 +82,7 @@ export function mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin
 
   /* ---------- pictures: the loose images and the baked sheets ---------- */
   app.get("/api/media", wrap(async (req, res) => {
-    const [media, clips] = await Promise.all([readJson("media.json"), readJson("clips.json")]);
+    const [media, clips] = await Promise.all([readMedia(), readJson("clips.json")]);
     const items = [];
     for (const [key, file] of Object.entries(media)) items.push({ key, label: IMAGE_LABELS[key] || key, kind: "image", url: await mediaUrl(req, file) });
     for (const [key, c] of Object.entries(clips)) {
@@ -93,7 +95,8 @@ export function mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin
     const f = req.file;
     try {
       if (!f) return res.status(400).json({ error: "send the picture as multipart field \"file\"" });
-      const [media, clips] = await Promise.all([readJson("media.json"), readJson("clips.json")]);
+      const [own, shipped, clips] = await Promise.all([readJson("media.json"), readMedia(), readJson("clips.json")]);
+      const media = { ...shipped, ...own };
       const isSheet = clips[key]?.kind === "sheet";
       if (!isSheet && !(key in media)) return res.status(404).json({ error: "unknown picture" });
       const ext = (isSheet ? SHEET_TYPES : IMAGE_TYPES)[f.mimetype];
@@ -108,7 +111,7 @@ export function mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin
       const rel = dir ? `${dir}/${name}` : name;
       const old = isSheet ? clips[key].file : media[key];
       if (isSheet) { clips[key].file = rel; clips[key].updatedAt = Date.now(); await writeJson("clips.json", clips); }
-      else { media[key] = rel; await writeJson("media.json", media); }
+      else { await writeJson("media.json", { ...own, [key]: rel }); }
       // keep the shipped originals; remove only pictures that were uploaded here
       if (/-\d{13}\.\w+$/.test(old)) await rm(path.join(DATA, "media", old), { force: true });
       res.json({ key, url: await mediaUrl(req, rel) });
