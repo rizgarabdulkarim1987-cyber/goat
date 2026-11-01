@@ -15,28 +15,38 @@ const PARALLEL = 8;
 // keeps the files, so a frame that was dropped comes back quickly.
 const LITE = matchMedia("(max-width: 820px)").matches;
 const KEEP = LITE ? 6 : 10;
+// On a phone a frame is decoded as an ImageBitmap at half size and closed when it is dropped: iOS keeps the pixels of
+// an <img> in its own cache after src is cleared, so dropping those never gave the memory back and the tab was killed.
+const BITMAPS = LITE && typeof createImageBitmap === "function";
 function makeFrames(meta, keepAll = false) {
   const images = new Array(meta.n);
   const listeners = new Set();
   let cur = 0;
+  const drop = (k) => { const e = images[k]; images[k] = undefined; if (e.img instanceof Image) e.img.src = ""; else e.img?.close?.(); };
   const evict = () => {
     if (keepAll) return;
     const have = [];
     images.forEach((e, k) => { if (e?.ok) have.push(k); });
     if (have.length <= KEEP) return;
     have.sort((a, b) => Math.abs(b - cur) - Math.abs(a - cur));
-    for (const k of have.slice(0, have.length - KEEP)) { images[k].img.src = ""; images[k] = undefined; }
+    for (const k of have.slice(0, have.length - KEEP)) drop(k);
   };
   const load = (i) => {
     if (images[i]) return images[i].done;
-    const img = new Image();
-    const entry = { img, ok: false };
-    entry.done = new Promise((resolve) => {
-      img.onload = () => { entry.ok = true; evict(); listeners.forEach((f) => f(i)); resolve(true); };
-      img.onerror = () => { resolve(false); setTimeout(() => { if (images[i] === entry) images[i] = undefined; }, 700); }; // a frame the host refused is asked for again, not given up on
-    });
+    const entry = { img: null, ok: false };
+    const arrived = () => { entry.ok = true; evict(); listeners.forEach((f) => f(i)); return true; };
+    const failed = () => { setTimeout(() => { if (images[i] === entry) images[i] = undefined; }, 700); return false; }; // a frame the host refused is asked for again, not given up on
+    if (BITMAPS) {
+      entry.done = fetch(meta.frames[i]).then((r) => (r.ok ? r.blob() : Promise.reject()))
+        .then((b) => createImageBitmap(b, { resizeWidth: Math.round(meta.cell[0] / 2), resizeHeight: Math.round(meta.cell[1] / 2), resizeQuality: "high" }))
+        .then((bmp) => { if (images[i] !== entry) { bmp.close(); return false; } entry.img = bmp; return arrived(); }, failed);
+    } else {
+      const img = new Image();
+      entry.img = img;
+      entry.done = new Promise((resolve) => { img.onload = () => resolve(arrived()); img.onerror = () => resolve(failed()); });
+      img.src = meta.frames[i];
+    }
     images[i] = entry;
-    img.src = meta.frames[i];
     return entry.done;
   };
   return {
