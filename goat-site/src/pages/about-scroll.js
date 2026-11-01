@@ -15,7 +15,7 @@ export function aboutScroll(page, rtl) {
   const $$ = (sel, root = page) => [...root.querySelectorAll(sel)];
 
   if (!phone) {
-    const lenis = new Lenis({ lerp: 0.085, smoothWheel: true });
+    const lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
     lenis.on("scroll", ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -51,19 +51,22 @@ export function aboutScroll(page, rtl) {
     const parts = (sel) => $$(sel, scene);
 
     // the big titles are uncovered by a wipe
-    parts('[data-m="title"]').forEach((el, i) => into(el, { clipPath: start, opacity: 0.2 }, { clipPath: "inset(0 0% 0 0)", opacity: 1 }, 0.04 + i * 0.05, 0.18));
+    parts('[data-m="title"]').forEach((el, i) => {
+      into(el, { clipPath: start, opacity: 0.2 }, { clipPath: "inset(0 0% 0 0)", opacity: 1 }, 0.04 + i * 0.05, 0.18);
+      away(el, { opacity: 1 }, { opacity: 0 }, 0.3 + i * 0.03, 0.4);
+    });
 
     // floating words: slide in from below, hold, then drift upward away; vertical ones come from the side
     parts('[data-m="word"]').forEach((el, i) => {
       const vertical = el.classList.contains("v") || el.classList.contains("vp");
-      into(el, vertical ? { opacity: 0, y: 110, filter: "blur(10px)" } : { opacity: 0, y: 70, xPercent: i % 2 ? 14 : -14, filter: "blur(10px)" }, { opacity: 1, y: 0, xPercent: 0, filter: "blur(0px)" }, 0.02 + i * 0.035, 0.2);
-      away(el, { yPercent: 0 }, { yPercent: -140 - (i % 3) * 60 }, 0.2 + i * 0.03, 0.7);
+      into(el, { opacity: 0, y: vertical ? 40 : 24 }, { opacity: 1, y: 0 }, 0.02 + i * 0.035, 0.14);
+      away(el, { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -40 - (i % 3) * 20 }, 0.2 + i * 0.03, 0.5);
     });
 
     // circles come into focus from a blur and grow; they keep growing a little with the scroll
     parts('[data-m="circ"]').forEach((el, i) => {
       into(el, { scale: 0.55, opacity: 0, filter: "blur(14px)" }, { scale: 1, opacity: 1, filter: "blur(0px)" }, 0.02 + i * 0.05, 0.22);
-      away(el, { scale: 1, yPercent: 0 }, { scale: 1.1, yPercent: -6 }, 0.24 + i * 0.05, 0.7);
+      away(el, { scale: 1, opacity: 1 }, { scale: 1.06, opacity: 0 }, 0.24 + i * 0.05, 0.5);
       // the picture inside settles from a close-up while the circle opens, then drifts the other way
       const img = el.querySelector("img");
       if (img) {
@@ -74,8 +77,8 @@ export function aboutScroll(page, rtl) {
     // the thin ring around a founder opens up, as if drawn
     parts(".founder .orbit").forEach((el, i) => into(el, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1 }, 0.12 + i * 0.06, 0.25));
     parts('[data-m="dot"]').forEach((el, i) => {
-      into(el, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1 }, 0.08 + i * 0.04, 0.14);
-      away(el, { x: 0, y: 0 }, { y: (i % 2 ? -1 : 1) * 70, x: (i % 2 ? 1 : -1) * 40 }, 0.22, 0.7);
+      into(el, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)" }, 0.08 + i * 0.04, 0.12);
+      away(el, { x: 0, y: 0, opacity: 1 }, { y: (i % 2 ? -1 : 1) * 120, x: (i % 2 ? 1 : -1) * 80, opacity: 0 }, 0.22, 0.6);
     });
 
     // hairlines draw and erase, as on the home page
@@ -83,7 +86,7 @@ export function aboutScroll(page, rtl) {
       const len = p.getTotalLength();
       gsap.set(p, { strokeDasharray: `${len} ${len * 4}`, strokeDashoffset: len });
       if (first) intro.to(p, { strokeDashoffset: 0, duration: 1.6 }, 0.2 + i * 0.2); else tl.to(p, { strokeDashoffset: 0, duration: 0.4 }, 0.05 + i * 0.06);
-      tl.to(p, { strokeDashoffset: -len - 2, duration: 0.3 }, rest + i * 0.02);
+      tl.to(p, { opacity: 0, duration: 0.25 }, rest + 0.05 + i * 0.02);
     });
 
     // highlighter bars fill left to right (right to left in Arabic and Kurdish)
@@ -93,7 +96,7 @@ export function aboutScroll(page, rtl) {
     parts('[data-m="bg"]').forEach((el) => tl.fromTo(el, { yPercent: 0 }, { yPercent: -15, duration: 1 }, 0));
     parts('[data-m="giant"]').forEach((el) => {
       into(el, { scale: 0.55, opacity: 0, filter: "blur(16px)", transformOrigin: "50% 50%" }, { scale: 1, opacity: 1, filter: "blur(0px)" }, 0.02, 0.25);
-      away(el, { scale: 1, xPercent: 0 }, { scale: 1.12, xPercent: rtl ? 3 : -3 }, 0.3, 0.7);
+      away(el, { scale: 1, opacity: 1 }, { scale: 1.06, opacity: 0 }, 0.3, 0.5);
     });
 
     // the hill rises in three layers and its years pop up along it
