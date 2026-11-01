@@ -45,7 +45,9 @@ export function aboutScroll(page, rtl) {
     const intro = first ? gsap.timeline({ defaults: { ease: "power2.out" } }) : null;
     // `into` is an entrance (time-based on the first scene, scrubbed on the others); `away` is the drift that follows
     const into = (el, from, to, at, dur) => (first ? intro.fromTo(el, from, { ...to, duration: dur * 5 }, at * 4) : tl.fromTo(el, from, { ...to, duration: dur }, at));
-    const away = (el, from, to, at, dur) => tl.fromTo(el, from, { ...to, duration: dur, immediateRender: false }, first ? 0 : at);
+    // everything rests exactly where the design puts it while the scene is centred (about 0.4 to 0.6 of the scrub); only after that does it drift off
+    const rest = first ? 0.12 : 0.62;
+    const away = (el, from, to, at, dur) => tl.fromTo(el, from, { ...to, duration: Math.min(dur, 0.38), immediateRender: false }, rest + Math.min(at, 0.4) * 0.1);
     const parts = (sel) => $$(sel, scene);
 
     // the big titles are uncovered by a wipe
@@ -73,7 +75,7 @@ export function aboutScroll(page, rtl) {
       const len = p.getTotalLength();
       gsap.set(p, { strokeDasharray: `${len} ${len * 4}`, strokeDashoffset: len });
       if (first) intro.to(p, { strokeDashoffset: 0, duration: 1.6 }, 0.2 + i * 0.2); else tl.to(p, { strokeDashoffset: 0, duration: 0.4 }, 0.05 + i * 0.06);
-      tl.to(p, { strokeDashoffset: -len - 2, duration: 0.4 }, first ? 0 : 0.6 + i * 0.04);
+      tl.to(p, { strokeDashoffset: -len - 2, duration: 0.3 }, rest + i * 0.02);
     });
 
     // highlighter bars fill left to right (right to left in Arabic and Kurdish)
@@ -88,7 +90,7 @@ export function aboutScroll(page, rtl) {
 
     // the hill rises in three layers and its years pop up along it
     parts(".hill path").forEach((p, i) => tl.fromTo(p, { yPercent: 18 + i * 8 }, { yPercent: 0, duration: 0.3 }, 0.02 + i * 0.05));
-    parts('[data-m="stop"]').forEach((el, i) => tl.fromTo(el, { opacity: 0, scale: 0.2, y: 24 }, { opacity: 1, scale: 1, y: 0, duration: 0.1 }, 0.22 + i * 0.07));
+    parts('[data-m="stop"]').forEach((el, i) => tl.fromTo(el, { opacity: 0, scale: 0.2, y: 24 }, { opacity: 1, scale: 1, y: 0, duration: 0.1 }, 0.12 + i * 0.05));
 
     // the team and the clients pop in one after the other
     parts('[data-m="team"]').forEach((list) => tl.fromTo([...list.children], { opacity: 0, scale: 0.6, y: 30 }, { opacity: 1, scale: 1, y: 0, stagger: 0.04, duration: 0.2 }, 0.12));
