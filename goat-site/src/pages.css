@@ -470,6 +470,9 @@ html[data-lang="ar"] .clients li, html[data-lang="ckb"] .clients li { letter-spa
 /* phones: the very same scenes, scaled to the screen width (one design pixel = 1/1438 of the width), with room under the top bar */
 @media (max-width: 820px) {
   .about { --cu: calc(100vw / 1438); padding-top: 48px; }
+  /* the top bar is white on the about page: its links must be dark (on desktop they are white over the blend) */
+  body[data-page="about"] #ui { color: #111; }
+  body[data-page="about"] #ui a[aria-current="page"] { background: #111; color: #fff; }
   .scene.curve { margin-top: -5vw; }
   .flow { padding: 6vw 0; }
   .s9b .team { gap: 16px; }
