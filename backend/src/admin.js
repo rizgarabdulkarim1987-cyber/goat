@@ -113,6 +113,57 @@ export function mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin
     } finally { await clean(req.file ? [req.file] : []); }
   }));
 
+  /* ---------- work, blog and team: whole lists, edited per language ---------- */
+  // <name>.json is English, <name>.<lang>.json the other languages. A list can be empty (the pages show a plain message).
+  const str = (max, min = 0) => (v) => typeof v === "string" && v.trim().length >= min && v.length <= max;
+  const slug = (v) => typeof v === "string" && /^[a-z0-9][a-z0-9-]{0,59}$/.test(v);
+  const file = (v) => v === undefined || v === "" || (typeof v === "string" && /^[\w.-]{1,120}$/.test(v));
+  const list = (maxItems, item) => (v) => Array.isArray(v) && v.length <= maxItems && v.every(item);
+  const COLLECTIONS = {
+    work: { key: "slug", shape: { slug, title: str(120, 1), client: str(120), year: (v) => Number.isInteger(v) && v >= 1990 && v <= 2100, category: str(40, 1), summary: str(400), body: str(4000), tags: list(12, str(40, 1)), image: file } },
+    blog: { key: "slug", shape: { slug, title: str(160, 1), date: (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v), author: str(80), tags: list(12, str(40, 1)), excerpt: str(400), body: list(40, str(4000)), image: file } },
+    team: { key: "id", shape: { id: slug, name: str(80, 1), role: str(120), photo: file } },
+  };
+  const collection = (req, res, next) => (COLLECTIONS[req.params.name] ? next() : res.status(404).json({ error: "unknown list" }));
+  const collectionFile = (name, lang) => `${name}${lang === "en" ? "" : `.${lang}`}.json`;
+  // the raw list of one language; a language with no file of its own starts from the English one
+  app.get("/api/admin/collection/:name", admin, collection, wrap(async (req, res) => {
+    const lang = langOf(req), name = req.params.name;
+    const own = lang === "en" ? null : await readJson(collectionFile(name, lang)).catch((err) => { if (err.code === "ENOENT") return null; throw err; });
+    res.json({ lang, translated: lang === "en" || Boolean(own), items: own || await readJson(`${name}.json`) });
+  }));
+  app.put("/api/admin/collection/:name", admin, collection, wrap(async (req, res) => {
+    const { key, shape } = COLLECTIONS[req.params.name];
+    const items = req.body?.items;
+    if (!Array.isArray(items) || items.length > 200) return res.status(400).json({ error: "send { items: [...] } with at most 200 items" });
+    const seen = new Set();
+    for (const [i, it] of items.entries()) {
+      if (!it || typeof it !== "object") return res.status(400).json({ error: `item ${i + 1} is not an object` });
+      for (const [field, ok] of Object.entries(shape)) {
+        if (!ok(it[field])) return res.status(400).json({ error: `item ${i + 1}: "${field}" is missing or not valid` });
+      }
+      if (seen.has(it[key])) return res.status(400).json({ error: `two items share the ${key} "${it[key]}"` });
+      seen.add(it[key]);
+    }
+    // keep only the known fields, so nothing unexpected is stored (an empty picture is simply dropped)
+    const clean = items.map((it) => Object.fromEntries(Object.keys(shape).filter((f) => it[f] !== undefined && it[f] !== "").map((f) => [f, typeof it[f] === "string" ? it[f].trim() : it[f]])));
+    await writeJson(collectionFile(req.params.name, langOf(req)), clean);
+    res.json({ lang: langOf(req), items: clean });
+  }));
+  // a picture for a project, a post or a team member: "square" is cut to a centred 700 px square, "wide" is scaled to at most 1600 px wide
+  app.post("/api/admin/image", admin, guard(upload.single("file")), wrap(async (req, res) => {
+    const f = req.file;
+    try {
+      if (!f) return res.status(400).json({ error: "send the picture as multipart field \"file\"" });
+      if (!SHEET_TYPES[f.mimetype]) return res.status(415).json({ error: "use png, jpg or webp" });
+      const vf = req.query.shape === "square" ? String.raw`crop=min(iw\,ih):min(iw\,ih),scale=700:700:flags=lanczos` : String.raw`scale=min(1600\,iw):-2:flags=lanczos`;
+      const name = `up-${Date.now()}.jpg`;
+      await mkdir(path.join(DATA, "media"), { recursive: true });
+      await run(["-i", f.path, "-vf", vf, "-frames:v", "1", "-q:v", "3", path.join(DATA, "media", name)]);
+      res.json({ file: name, url: await mediaUrl(req, name) });
+    } finally { await clean(req.file ? [req.file] : []); }
+  }));
+
   /* ---------- circles: change the clip's timing, or replace its frames with a video or a set of pictures ---------- */
   const isNum = (v) => typeof v === "number" && Number.isFinite(v);
   app.put("/api/clips/:name", admin, wrap(async (req, res) => {

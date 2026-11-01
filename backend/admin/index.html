@@ -92,7 +92,7 @@ function login() {
 }
 
 /* ---------- shell ---------- */
-const TABS = [["texts", "Words"], ["counters", "Numbers"], ["pictures", "Pictures"], ["circles", "Circles"], ["messages", "Messages"]];
+const TABS = [["texts", "Words"], ["pages", "Work, blog, team"], ["counters", "Numbers"], ["pictures", "Pictures"], ["circles", "Circles"], ["messages", "Messages"]];
 function shell() {
   const body = h("main");
   const nav = h("nav", { role: "tablist" });
@@ -231,7 +231,64 @@ async function messagesView() {
       h("tbody", null, [...list].reverse().map((m) => h("tr", null, h("td", null, new Date(m.receivedAt).toLocaleString()), h("td", null, `${m.name} <${m.email}>`), h("td", null, m.topic), h("td", { style: "white-space:pre-wrap" }, m.message)))))
       : h("p", { class: "meta" }, "nothing yet"));
 }
-const VIEWS = { texts: textsView, counters: countersView, pictures: picturesView, circles: circlesView, messages: messagesView };
+/* ---------- work, blog, team: lists of items with a picture, one language at a time ---------- */
+const LISTS = {
+  work: { label: "Work", key: "slug", pic: ["image", "wide"], blank: () => ({ slug: "new-project", title: "", client: "", year: new Date().getFullYear(), category: "", summary: "", body: "", tags: [] }),
+    fields: [["title", "text"], ["client", "text"], ["year", "number"], ["category", "text"], ["slug", "slug"], ["summary", "area"], ["body", "area"], ["tags", "tags"]] },
+  blog: { label: "Blog", key: "slug", pic: ["image", "wide"], blank: () => ({ slug: "new-post", title: "", date: new Date().toISOString().slice(0, 10), author: "", tags: [], excerpt: "", body: [""] }),
+    fields: [["title", "text"], ["date", "text"], ["author", "text"], ["slug", "slug"], ["excerpt", "area"], ["body", "paras"], ["tags", "tags"]] },
+  team: { label: "Team", key: "id", pic: ["photo", "square"], blank: () => ({ id: "new-member", name: "", role: "" }),
+    fields: [["name", "text"], ["role", "text"], ["id", "slug"]] },
+};
+let PLIST = sessionStorage.getItem("goat-admin-list") || "work";
+async function pagesView() {
+  const spec = LISTS[PLIST], L = WLANG;
+  const data = await api(`/api/admin/collection/${PLIST}?lang=${L}`);
+  const items = data.items.map((x) => structuredClone(x));
+  const [picField, picShape] = spec.pic;
+  const show = () => document.querySelector("nav [aria-selected=true]").click();
+  const pick = (cur, set, items2) => h("div", { class: "langpick", role: "group" }, items2.map(([code, label]) => h("button", { type: "button", class: "btn ghost", "aria-pressed": String(code === cur), onclick: () => { set(code); show(); } }, label)));
+  const list = h("div");
+  const save = h("button", { class: "btn" }, "save all");
+  const mark = () => save.textContent = "save all *";
+  const render = () => list.replaceChildren(...items.map((it, i) => card(it, i)), h("button", { class: "btn ghost", onclick: () => { items.push(spec.blank()); mark(); render(); } }, `+ add ${spec.label.toLowerCase()} item`));
+  function card(it, i) {
+    const img = h("img", { alt: "", src: it[picField] ? `/media/${it[picField]}` : "", style: it[picField] ? "" : "display:none" });
+    const file = h("input", { type: "file", accept: "image/png,image/jpeg,image/webp", "aria-label": "picture" });
+    file.addEventListener("change", async () => {
+      if (!file.files[0]) return;
+      try { const form = new FormData(); form.append("file", file.files[0]); const r = await api(`/api/admin/image?shape=${picShape}`, { method: "POST", form }); it[picField] = r.file; img.src = r.url; img.style.display = ""; mark(); toast("picture ready: save all to keep it"); } catch (e) { toast(e.message, true); }
+    });
+    const rows = spec.fields.map(([f, kind]) => {
+      const val = it[f];
+      const text = kind === "paras" ? val.join("\n\n") : kind === "tags" ? val.join(", ") : val ?? "";
+      const el = kind === "area" || kind === "paras" ? h("textarea", { rows: kind === "paras" ? 8 : 3 }) : h("input", { type: kind === "number" ? "number" : "text" });
+      el.value = text;
+      if (L !== "en" && kind !== "area" && kind !== "paras" && kind !== "tags" && f !== "title" && f !== "name" && f !== "role") el.title = "keep this the same in every language";
+      el.addEventListener("input", () => {
+        it[f] = kind === "paras" ? el.value.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean) : kind === "tags" ? el.value.split(",").map((s) => s.trim()).filter(Boolean) : kind === "number" ? Number(el.value) : el.value;
+        mark();
+      });
+      return h("label", { class: "meta" }, f + (kind === "paras" ? " (blank line between paragraphs)" : kind === "tags" ? " (comma between)" : ""), el);
+    });
+    const move = (d) => () => { const j = i + d; if (j < 0 || j >= items.length) return; [items[i], items[j]] = [items[j], items[i]]; mark(); render(); };
+    return h("div", { class: "card", style: "margin-bottom:14px" },
+      h("h3", null, `${i + 1}. ${it.title || it.name || it[spec.key]}`),
+      h("div", { class: "pic" + (picShape === "square" ? " round" : ""), style: "min-height:0" }, img), h("label", { class: "meta" }, "picture ", file),
+      ...rows,
+      h("div", { style: "display:flex;gap:8px" }, h("button", { class: "btn ghost", onclick: move(-1) }, "up"), h("button", { class: "btn ghost", onclick: move(1) }, "down"),
+        h("button", { class: "btn ghost", style: "margin-left:auto", onclick: () => { if (confirm("delete this item?")) { items.splice(i, 1); mark(); render(); } } }, "delete")));
+  }
+  save.addEventListener("click", guard(save, async () => { await api(`/api/admin/collection/${PLIST}?lang=${L}`, { method: "PUT", json: { items } }); save.textContent = "save all"; toast("saved"); }));
+  render();
+  return h("div", null, h("h2", null, "Work, blog and team"),
+    h("p", { class: "hint" }, "Add, change, reorder or delete the projects, posts and team members on the site, one language at a time. A picture left empty in Arabic or Kurdish shows the English one. Keep the slug / id the same in every language. Press save all when you are done."),
+    pick(PLIST, (c) => { PLIST = c; sessionStorage.setItem("goat-admin-list", c); }, Object.entries(LISTS).map(([c, s]) => [c, s.label])),
+    pick(L, (c) => { WLANG = c; sessionStorage.setItem("goat-admin-lang", c); }, WORD_LANGS),
+    data.translated ? null : h("p", { class: "hint", role: "status" }, "This language has no list of its own yet: it starts as a copy of the English one. Translate it, then save."),
+    list, h("div", { style: "margin-top:16px" }, save));
+}
+const VIEWS = { texts: textsView, pages: pagesView, counters: countersView, pictures: picturesView, circles: circlesView, messages: messagesView };
 
 if (KEY) api("/api/admin/check").then(shell, login); else login();
 </script>

@@ -23,6 +23,8 @@ function applyRelease() {
   const read = (dir) => { try { return JSON.parse(readFileSync(path.join(dir, "release.json"), "utf8")); } catch { return { version: 0, replace: [] }; } };
   const shipped = read(BUNDLED), have = read(DATA);
   if (!(shipped.version > have.version)) return;
+  // whole data files (work.json, blog.json, team.json ...) the new release wants to replace once; edits made in the admin page to those files are overwritten
+  for (const f of shipped.files || []) if (existsSync(path.join(BUNDLED, f))) cpSync(path.join(BUNDLED, f), path.join(DATA, f));
   const clips = JSON.parse(readFileSync(path.join(DATA, "clips.json"), "utf8"));
   const fresh = JSON.parse(readFileSync(path.join(BUNDLED, "clips.json"), "utf8"));
   for (const name of shipped.replace) {
@@ -49,7 +51,11 @@ const COUNTER_KEYS = ["Prject", "client", "staff", "years"];
 // the site speaks English, Arabic and Sorani Kurdish; a page file for another language is <name>.<lang>.json and falls back to English
 const LANGS = ["en", "ar", "ckb"];
 
-const readJson = async (name) => JSON.parse(await readFile(path.join(DATA, name), "utf8"));
+// a file the data folder does not have yet (added by a newer deploy) is read from the bundled copy
+const readJson = async (name) => {
+  try { return JSON.parse(await readFile(path.join(DATA, name), "utf8")); }
+  catch (err) { if (err.code !== "ENOENT" || DATA === BUNDLED) throw err; return JSON.parse(await readFile(path.join(BUNDLED, name), "utf8")); }
+};
 const langOf = (req) => (LANGS.includes(req.query.lang) ? req.query.lang : "en");
 async function readLang(name, lang) {
   if (lang === "en") return readJson(name);
@@ -66,7 +72,7 @@ const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", 1); // behind the host's https proxy: urls the API hands out keep https
 app.use(cors(ORIGINS.length ? { origin: ORIGINS } : undefined));
-app.use(express.json({ limit: "32kb" }));
+app.use(express.json({ limit: "256kb" })); // the admin page saves whole lists of projects and posts
 
 const wrap = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 const admin = (req, res, next) => {
@@ -77,7 +83,7 @@ const admin = (req, res, next) => {
 
 app.get("/api", (req, res) => res.json({
   name: "goat backend",
-  endpoints: ["/api/health", "/api/clips", "/api/clips/:name", "/frames/<clip>/0000.jpg", "/api/counters", "/api/work", "/api/blog", "/api/about", "/api/music", "/api/social", "/api/search?q=", "POST /api/contact", "/api/content", "/admin"],
+  endpoints: ["/api/health", "/api/clips", "/api/clips/:name", "/frames/<clip>/0000.jpg", "/api/counters", "/api/work", "/api/blog", "/api/about", "/api/team", "/api/music", "/api/social", "/api/search?q=", "POST /api/contact", "/api/content", "/admin"],
   languages: LANGS,
   note: "add ?lang=ar or ?lang=ckb to the page, content, search and contact endpoints",
 }));
@@ -137,26 +143,41 @@ app.put("/api/counters", admin, wrap(async (req, res) => {
 }));
 
 /* ---------- pages: about, work, blog, music, social ---------- */
-app.get("/api/about", wrap(async (req, res) => res.json(await readLang("about.json", langOf(req)))));
+// work, blog and team items may carry a picture (a file name in data/media); it goes out as a full address, and a language that
+// has none of its own shows the English item's picture (matched by slug / id)
+async function withPictures(req, name, key, field, list) {
+  const lang = langOf(req);
+  const en = lang === "en" ? list : await readJson(name).catch(() => []);
+  return list.map((item) => {
+    const file = item[field] || en.find((e) => e[key] === item[key])?.[field];
+    const { [field]: _own, ...rest } = item;
+    return file ? { ...rest, [field]: `${origin(req)}/media/${file}` } : rest;
+  });
+}
+app.get("/api/team", wrap(async (req, res) => res.json(await withPictures(req, "team.json", "id", "photo", await readLang("team.json", langOf(req))))));
+app.get("/api/about", wrap(async (req, res) => {
+  const about = await readLang("about.json", langOf(req));
+  res.json({ ...about, team: await withPictures(req, "team.json", "id", "photo", await readLang("team.json", langOf(req))) });
+}));
 app.get("/api/music", wrap(async (req, res) => res.json(await readLang("music.json", langOf(req)))));
 app.get("/api/social", wrap(async (req, res) => res.json(await readLang("social.json", langOf(req)))));
 
 app.get("/api/work", wrap(async (req, res) => {
-  const list = await readLang("work.json", langOf(req));
+  const list = await withPictures(req, "work.json", "slug", "image", await readLang("work.json", langOf(req)));
   res.json(req.query.category ? list.filter((w) => w.category === req.query.category) : list);
 }));
 app.get("/api/work/:slug", wrap(async (req, res) => {
-  const item = (await readLang("work.json", langOf(req))).find((w) => w.slug === req.params.slug);
+  const item = (await withPictures(req, "work.json", "slug", "image", await readLang("work.json", langOf(req)))).find((w) => w.slug === req.params.slug);
   item ? res.json(item) : res.status(404).json({ error: "no such work" });
 }));
 
 app.get("/api/blog", wrap(async (req, res) => {
-  const list = (await readLang("blog.json", langOf(req))).sort((a, b) => b.date.localeCompare(a.date));
+  const list = (await withPictures(req, "blog.json", "slug", "image", await readLang("blog.json", langOf(req)))).sort((a, b) => b.date.localeCompare(a.date));
   // the list carries no bodies: the post page asks for one
   res.json(list.map(({ body, ...rest }) => rest));
 }));
 app.get("/api/blog/:slug", wrap(async (req, res) => {
-  const post = (await readLang("blog.json", langOf(req))).find((p) => p.slug === req.params.slug);
+  const post = (await withPictures(req, "blog.json", "slug", "image", await readLang("blog.json", langOf(req)))).find((p) => p.slug === req.params.slug);
   post ? res.json(post) : res.status(404).json({ error: "no such post" });
 }));
 

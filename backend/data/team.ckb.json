@@ -1,0 +1,32 @@
+[
+  {
+    "id": "rizgar",
+    "name": "Rizgar",
+    "role": "دامەزرێنەر، بەڕێوەبەری داهێنان"
+  },
+  {
+    "id": "lana",
+    "name": "Lana",
+    "role": "سەرپەرشتیاری دیزاین"
+  },
+  {
+    "id": "aras",
+    "name": "Aras",
+    "role": "جووڵە و سێ ڕەهەند"
+  },
+  {
+    "id": "shno",
+    "name": "Shno",
+    "role": "ستراتیژی و دەقنووسی"
+  },
+  {
+    "id": "dilan",
+    "name": "Dilan",
+    "role": "مۆنتاژی فیلم"
+  },
+  {
+    "id": "hawre",
+    "name": "Hawre",
+    "role": "پەرەپێدانی وێب"
+  }
+]

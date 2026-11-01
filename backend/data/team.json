@@ -1,0 +1,32 @@
+[
+  {
+    "id": "rizgar",
+    "name": "Rizgar",
+    "role": "founder, creative direction"
+  },
+  {
+    "id": "lana",
+    "name": "Lana",
+    "role": "design lead"
+  },
+  {
+    "id": "aras",
+    "name": "Aras",
+    "role": "motion and 3D"
+  },
+  {
+    "id": "shno",
+    "name": "Shno",
+    "role": "strategy and copy"
+  },
+  {
+    "id": "dilan",
+    "name": "Dilan",
+    "role": "film editor"
+  },
+  {
+    "id": "hawre",
+    "name": "Hawre",
+    "role": "web development"
+  }
+]

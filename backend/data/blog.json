@@ -1,5 +1,96 @@
 [
-  { "slug": "why-we-scrub-the-scroll", "title": "why we scrub the scroll", "date": "2026-10-12", "author": "Rizgar", "tags": ["motion", "web"], "excerpt": "A scroll-driven film is one timeline and one rule: a second of video is a fixed number of pixels.", "body": ["Our home page is a film you play with the wheel. Underneath it is a single timeline where one second is seventy pixels of scroll, and every position in it was measured from the reference animation.", "That rule is boring on purpose. It means a designer can say “look at 36 seconds” and everybody sees the same frame, whether they scrolled there or jumped there.", "The pictures inside the circles are frame sequences. They are picked by the same clock, so a runner never gets ahead of the headline."] },
-  { "slug": "small-details-big-projects", "title": "the smallest details, the biggest projects", "date": "2026-09-03", "author": "Lana", "tags": ["design", "process"], "excerpt": "Obsessing over a one pixel line is not vanity. It is how a brand feels expensive.", "body": ["There is no tiny project. A one pixel hairline that is a pixel too thick is the difference between a page that feels drawn and a page that feels assembled.", "We keep a list of details we refuse to ship wrong: the leading of small paragraphs, the weight of a ring, the second a word fades in. Clients rarely notice them one by one. They notice all of them together."] },
-  { "slug": "colors-wake-up-lines", "title": "lines, shapes, colors: our order of work", "date": "2026-07-21", "author": "Shno", "tags": ["process", "identity"], "excerpt": "We draw before we choose a palette. Color is the last thing that happens to an idea.", "body": ["Lines first, because a line is the cheapest way to be wrong. Shapes second, because lines become shapes the moment they close. Colors last, because color can rescue a weak idea for a week and ruin a strong one forever.", "If a project still works in black and white, it is ready for color."] }
+  {
+    "slug": "why-we-scrub-the-scroll",
+    "title": "why we scrub the scroll",
+    "date": "2026-10-12",
+    "author": "Rizgar",
+    "tags": [
+      "motion",
+      "web"
+    ],
+    "excerpt": "A scroll-driven film is one timeline and one rule: a second of video is a fixed number of pixels.",
+    "body": [
+      "Our home page is a film you play with the wheel. Underneath it is a single timeline where one second is seventy pixels of scroll, and every position in it was measured from the reference animation.",
+      "That rule is boring on purpose. It means a designer can say “look at 36 seconds” and everybody sees the same frame, whether they scrolled there or jumped there.",
+      "The pictures inside the circles are frame sequences. They are picked by the same clock, so a runner never gets ahead of the headline."
+    ]
+  },
+  {
+    "slug": "small-details-big-projects",
+    "title": "the smallest details, the biggest projects",
+    "date": "2026-09-03",
+    "author": "Lana",
+    "tags": [
+      "design",
+      "process"
+    ],
+    "excerpt": "Obsessing over a one pixel line is not vanity. It is how a brand feels expensive.",
+    "body": [
+      "There is no tiny project. A one pixel hairline that is a pixel too thick is the difference between a page that feels drawn and a page that feels assembled.",
+      "We keep a list of details we refuse to ship wrong: the leading of small paragraphs, the weight of a ring, the second a word fades in. Clients rarely notice them one by one. They notice all of them together."
+    ]
+  },
+  {
+    "slug": "colors-wake-up-lines",
+    "title": "lines, shapes, colors: our order of work",
+    "date": "2026-07-21",
+    "author": "Shno",
+    "tags": [
+      "process",
+      "identity"
+    ],
+    "excerpt": "We draw before we choose a palette. Color is the last thing that happens to an idea.",
+    "body": [
+      "Lines first, because a line is the cheapest way to be wrong. Shapes second, because lines become shapes the moment they close. Colors last, because color can rescue a weak idea for a week and ruin a strong one forever.",
+      "If a project still works in black and white, it is ready for color."
+    ]
+  },
+  {
+    "slug": "a-logo-is-a-promise",
+    "title": "a logo is a promise",
+    "date": "2026-10-28",
+    "author": "Rizgar",
+    "tags": [
+      "identity",
+      "craft"
+    ],
+    "excerpt": "A logo does not need to say everything. It needs to be easy to keep promising.",
+    "body": [
+      "We get asked for logos that explain the company. We almost always say no, and then show a circle with something small inside it.",
+      "A mark is a promise that gets repeated a thousand times: on a bag, on a screen, on the side of a van. Anything that is hard to repeat becomes a different promise each time.",
+      "So we draw it big first, then shrink it until it breaks, and keep the last version that still holds."
+    ]
+  },
+  {
+    "slug": "writing-in-three-languages",
+    "title": "writing in three languages",
+    "date": "2026-09-22",
+    "author": "Shno",
+    "tags": [
+      "copy",
+      "process"
+    ],
+    "excerpt": "English, Arabic and Kurdish are not three versions of one text. They are three first drafts.",
+    "body": [
+      "Every project here ships in three languages, and we learned early that translating at the end shows. The Arabic reads like English wearing a scarf.",
+      "Now the writer starts in the language the headline sounds best in, and the other two are written, not converted. Sometimes the Kurdish line is the strongest and the English one gets rewritten to match.",
+      "It costs a day more per project. It saves the week we used to spend arguing about why it feels off."
+    ]
+  },
+  {
+    "slug": "the-first-ten-seconds-of-a-film",
+    "title": "the first ten seconds of a film",
+    "date": "2026-08-14",
+    "author": "Aras",
+    "tags": [
+      "motion",
+      "film"
+    ],
+    "excerpt": "Most people decide in ten seconds. We spend a third of the budget on them.",
+    "body": [
+      "The opening of a film has one job: to make a stranger stay. We storyboard those ten seconds before we storyboard anything else.",
+      "That means one clear shape, one clear move and no logo until the viewer already cares. The brand shows up as the answer, not as the question.",
+      "Everything after that is craft, and craft is the easy part."
+    ]
+  }
 ]

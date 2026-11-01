@@ -1,7 +1,126 @@
 [
-  { "slug": "hisense-late-night", "title": "Hisense", "client": "Hisense", "year": 2026, "category": "campaign", "summary": "A carousel of cans for a summer drink launch: one film, forty cutdowns, one string that holds it together.", "body": "We built the whole launch around a single motion idea, cans hanging from a string and rotating one slot at a time. The master film shipped with forty cutdowns for social, retail screens and out of home.", "tags": ["film", "motion", "packaging"] },
-  { "slug": "plant-creative-ideas", "title": "Creative ideas", "client": "Greenhouse Studio", "year": 2025, "category": "identity", "summary": "A seedling in a circle: an identity for a studio that grows ideas from the ground up.", "body": "The mark is a circle holding a young plant, the wordmark is set in a heavy serif that feels planted rather than placed. The identity system flexes from a stamp to a full-screen film.", "tags": ["identity", "illustration"] },
-  { "slug": "leap-runners", "title": "To leap", "client": "Run Club Erbil", "year": 2025, "category": "campaign", "summary": "Runners caught mid-leap inside circles, for a city running club that wants to do the firsts.", "body": "Three circles, three runners, one line of copy: smash the records. The campaign ran on posters, a scroll-driven site and a live leaderboard.", "tags": ["campaign", "web"] },
-  { "slug": "goat-eye", "title": "The eye", "client": "GOAT", "year": 2026, "category": "own", "summary": "Our own front door: a goat eye that grows into the screen as you scroll.", "body": "The home page is one long scroll that plays like a film. Every move is keyed to the second of a reference animation, and every picture inside a circle is a frame sequence served from our own backend.", "tags": ["web", "scroll", "motion"] },
-  { "slug": "sell-better", "title": "Sell that better", "client": "Souq Digital", "year": 2024, "category": "web", "summary": "A marketplace launch page with a marquee that never stops selling.", "body": "A loud marquee, a quiet checkout. We cut the funnel down to three steps and let the typography carry the brand.", "tags": ["web", "ecommerce", "typography"] }
+  {
+    "slug": "hisense-late-night",
+    "title": "Hisense",
+    "client": "Hisense",
+    "year": 2026,
+    "category": "campaign",
+    "summary": "A carousel of cans for a summer drink launch: one film, forty cutdowns, one string that holds it together.",
+    "body": "We built the whole launch around a single motion idea, cans hanging from a string and rotating one slot at a time. The master film shipped with forty cutdowns for social, retail screens and out of home.",
+    "tags": [
+      "film",
+      "motion",
+      "packaging"
+    ]
+  },
+  {
+    "slug": "plant-creative-ideas",
+    "title": "Creative ideas",
+    "client": "Greenhouse Studio",
+    "year": 2025,
+    "category": "identity",
+    "summary": "A seedling in a circle: an identity for a studio that grows ideas from the ground up.",
+    "body": "The mark is a circle holding a young plant, the wordmark is set in a heavy serif that feels planted rather than placed. The identity system flexes from a stamp to a full-screen film.",
+    "tags": [
+      "identity",
+      "illustration"
+    ]
+  },
+  {
+    "slug": "leap-runners",
+    "title": "To leap",
+    "client": "Run Club Erbil",
+    "year": 2025,
+    "category": "campaign",
+    "summary": "Runners caught mid-leap inside circles, for a city running club that wants to do the firsts.",
+    "body": "Three circles, three runners, one line of copy: smash the records. The campaign ran on posters, a scroll-driven site and a live leaderboard.",
+    "tags": [
+      "campaign",
+      "web"
+    ]
+  },
+  {
+    "slug": "goat-eye",
+    "title": "The eye",
+    "client": "GOAT",
+    "year": 2026,
+    "category": "own",
+    "summary": "Our own front door: a goat eye that grows into the screen as you scroll.",
+    "body": "The home page is one long scroll that plays like a film. Every move is keyed to the second of a reference animation, and every picture inside a circle is a frame sequence served from our own backend.",
+    "tags": [
+      "web",
+      "scroll",
+      "motion"
+    ]
+  },
+  {
+    "slug": "sell-better",
+    "title": "Sell that better",
+    "client": "Souq Digital",
+    "year": 2024,
+    "category": "web",
+    "summary": "A marketplace launch page with a marquee that never stops selling.",
+    "body": "A loud marquee, a quiet checkout. We cut the funnel down to three steps and let the typography carry the brand.",
+    "tags": [
+      "web",
+      "ecommerce",
+      "typography"
+    ]
+  },
+  {
+    "slug": "noor-coffee-roasters",
+    "title": "Noor",
+    "client": "Noor Coffee",
+    "year": 2026,
+    "category": "identity",
+    "summary": "A roastery whose name means light: a warm mark, a paper bag you want to keep and a menu that reads at arm's length.",
+    "body": "Noor roasts in small batches in Sulaymaniyah and wanted to look like it. We drew one sun-circle, set the name in a heavy serif and let the bags carry a single colour per roast. The menu boards use the same grid as the bag labels, so the shop and the shelf feel like one thing.",
+    "tags": [
+      "identity",
+      "packaging",
+      "print"
+    ]
+  },
+  {
+    "slug": "dawn-city-festival",
+    "title": "Dawn",
+    "client": "Dawn City Festival",
+    "year": 2025,
+    "category": "campaign",
+    "summary": "Three nights, one rising circle: the poster system and the opening film for a city festival.",
+    "body": "A circle climbs the poster across the three nights and the film plays the same climb in thirty seconds. Every venue got its own cut of the poster, and all of them still read as one festival from across the street.",
+    "tags": [
+      "poster",
+      "film",
+      "outdoor"
+    ]
+  },
+  {
+    "slug": "hayat-pharmacy-app",
+    "title": "Hayat",
+    "client": "Hayat Pharmacy",
+    "year": 2025,
+    "category": "web",
+    "summary": "A calm ordering site for a pharmacy chain: refill in three taps, no account needed.",
+    "body": "People come to a pharmacy worried, so the site does one job per screen. We cut the order to three steps, wrote every label in plain Kurdish and Arabic first, and tested the flow on an old phone before a new one.",
+    "tags": [
+      "web",
+      "ux",
+      "copy"
+    ]
+  },
+  {
+    "slug": "zagros-trail-run",
+    "title": "Zagros",
+    "client": "Zagros Trail Run",
+    "year": 2024,
+    "category": "campaign",
+    "summary": "A mountain race announced with a single line that runs across every piece, from the bib to the billboard.",
+    "body": "The route became the identity: one hand-drawn line that climbs, drops and finally closes into a circle. It runs across the bib, the medal, the map and the billboard, so the race is recognised before anyone reads the name.",
+    "tags": [
+      "identity",
+      "motion",
+      "outdoor"
+    ]
+  }
 ]
