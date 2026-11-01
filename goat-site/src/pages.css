@@ -353,10 +353,8 @@ body[data-page="about"] #ui a[aria-current="page"] { text-decoration: none; back
 /* the sixth scene lets its last picture hang down over the seventh */
 .scene.spill { overflow: visible; z-index: 3; }
 .stage { position: relative; width: calc(1438 * var(--cu)); height: calc(var(--sh, 960) * var(--cu)); margin-inline: auto; }
-.stage > * { position: absolute; left: calc((var(--x, 0) + var(--ax, 0)) * var(--cu) + (var(--mx, 0) + var(--px, 0)) * 1px); top: calc((var(--y, 0) + var(--py, 0) + var(--ay, 0)) * var(--cu) + (var(--my, 0) + var(--pyy, 0)) * 1px); margin: 0; }
+.stage > * { position: absolute; left: calc(var(--x, 0) * var(--cu)); top: calc(var(--y, 0) * var(--cu)); margin: 0; }
 .stage > .hairs, .stage > .hill { left: 0; top: 0; }
-/* the scroll script adds to the position: depth glide --py and slow float --ax --ay (design pixels), button lean --mx --my and pointer lean --px --pyy (screen pixels) */
-@media (hover: hover) { .circ img { transition: scale .9s cubic-bezier(.2, .7, .2, 1); } .circ:hover img { scale: 1.07; } .btn-red, .btn-ink { transition: background-color .3s, color .3s; } }
 .hairs, .hill { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .hairs path { fill: none; stroke: #a7a5a6; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .scene.dark .hairs path, .photo .hairs path { stroke: rgba(255, 255, 255, .6); }
