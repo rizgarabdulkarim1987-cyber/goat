@@ -15,6 +15,7 @@ if (slug) {
     return h("article", { class: "article" },
       h("a", { class: "back", href: "/blog.html" }, h("span", { class: "back-ring", "aria-hidden": "true" }), t("ui.allPosts", "all posts")),
       h("h2", { class: "h2" }, post.title),
+      post.image ? h("img", { class: "post-cover", src: post.image, alt: "", decoding: "async" }) : null,
       h("p", { class: "byline small" }, fmt(post.date), "·", post.author, post.tags.map((t) => h("span", { class: "chip" }, t))),
       h("div", { style: "margin-top:40px" }, post.body.map((para) => h("p", { class: "p" }, para))));
   });
@@ -22,9 +23,11 @@ if (slug) {
   page.append(pageHead(t("nav.blog", "blog"), t("ui.blog.lede", "notes on motion, craft and how we work.")), body, homeLink());
   mount(body, async () => {
     const posts = await api("/api/blog");
-    return h("ul", { class: "posts" }, posts.map((p) => h("li", { class: "post-row" },
+    if (!posts.length) return h("div", { class: "state" }, h("p", { class: "state-title" }, t("ui.blog.empty", "no posts yet. check back soon.")));
+    return h("ul", { class: "posts" }, posts.map((p) => h("li", { class: `post-row${p.image ? " has-pic" : ""}` },
       h("a", { href: `/blog.html?post=${encodeURIComponent(p.slug)}` },
         h("span", { class: "date" }, fmt(p.date), h("br"), p.author),
-        h("span", null, h("h2", { class: "h2" }, p.title), h("p", { class: "p muted" }, p.excerpt))))));
+        h("span", null, h("h2", { class: "h2" }, p.title), h("p", { class: "p muted" }, p.excerpt)),
+        p.image ? h("img", { class: "post-thumb", src: p.image, alt: "", loading: "lazy", decoding: "async" }) : null))));
   });
 }

@@ -60,7 +60,7 @@ function reveal(root) {
 }
 
 // the picture that sits in the page's circle: one frame of a circle clip, or the can picture
-const ART = { about: ["eye", 1], work: [["can2", 0], ["can3", 0], ["can1", 0]], contact: ["plant", 0.5], blog: ["leapA", 0.5], music: ["cheer", 0.5], search: ["eye", 1], social: ["leapB", 0.5] };
+const ART = { about: ["eye", 1], work: [["can2", 0], ["can3", 0], ["can1", 0]], contact: ["plant", 0.12], blog: ["leapA", 0.5], music: ["cheer", 0.5], search: ["eye", 1], social: ["leapB", 0.5] };
 async function orbPicture(spec) {
   const c = await api(`/api/clips/${spec[0]}`);
   return c.frames?.[Math.min(c.n - 1, Math.floor(c.n * spec[1]))];

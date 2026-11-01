@@ -294,3 +294,54 @@ body[data-page="social"] .link a:hover .t { color: #000; }
 @media (prefers-reduced-motion: reduce) {
   body[data-page="music"] .orb::before, body[data-page="music"] .orb::after { animation: none; }
 }
+
+/* ---- tidy pass for about, work, contact and blog: one head layout, a calmer type scale, white bands, real pictures ---- */
+body:is([data-page="about"], [data-page="work"], [data-page="contact"], [data-page="blog"]) .ghost { display: none; }
+.h2 { font-size: clamp(28px, calc(56 * var(--cu)), 80px); }
+.sec { padding: calc(56 * var(--cu)) 0; }
+
+/* the word on the left, its circle on the right: the two can no longer run into each other (about keeps its big centred circle) */
+body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: calc(40 * var(--cu)); min-height: 0; margin-bottom: calc(64 * var(--cu)); }
+body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .head h1 { grid-column: 1; font-size: clamp(52px, min(calc(150 * var(--cu)), 15vw), 230px); overflow-wrap: anywhere; }
+body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .head .lede { grid-column: 1; }
+body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .head .head-curve { grid-column: 1 / -1; }
+body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .orb { position: relative; inset: auto; grid-column: 2; grid-row: 1 / span 3; width: clamp(180px, calc(300 * var(--cu)), 380px); }
+body[data-page="work"] .orb { width: clamp(240px, calc(420 * var(--cu)), 540px); }
+body[data-page="blog"] .orb { width: clamp(100px, calc(180 * var(--cu)), 230px); margin-inline-end: calc(36 * var(--cu)); }
+body[data-page="blog"] .head { border-bottom: 0; padding-bottom: 0; }
+body[data-page="blog"] .head .head-curve { display: block; }
+body[data-page="blog"] .head .head-curve path { stroke: #000; }
+
+/* about: every second section is a white band right across the page (the nav column inverts over it) */
+.sec.light { background: #fff; color: #000; --ink-soft: #555; --line: #ccc; box-shadow: 0 0 0 100vmax #fff; clip-path: inset(0 -100vmax); border-top: 0; }
+@media (min-width: 821px) { body[data-page="about"] #ui { mix-blend-mode: difference; } }
+
+.avatar { display: grid; place-items: center; width: clamp(84px, calc(132 * var(--cu)), 160px); aspect-ratio: 1; border: 1px solid currentColor; border-radius: 50%; overflow: hidden; margin-bottom: calc(10 * var(--cu)); font-weight: 900; font-size: clamp(32px, calc(54 * var(--cu)), 64px); line-height: 1; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.work-pic { display: block; width: 100%; max-height: calc(440 * var(--cu)); min-height: 160px; object-fit: cover; border-radius: 24px; margin-bottom: calc(24 * var(--cu)); background: #eee; }
+.post-row.has-pic a { grid-template-columns: calc(150 * var(--cu)) 1fr clamp(72px, calc(120 * var(--cu)), 150px); align-items: center; }
+.post-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 50%; }
+.post-cover { display: block; width: 100%; max-height: calc(460 * var(--cu)); object-fit: cover; border-radius: 24px; margin: 0 0 calc(32 * var(--cu)); }
+
+/* long words in any language wrap instead of pushing the page wide, and joined scripts are never spaced or uppercased */
+.h2, .work .t, .post-row .h2, .team .name { overflow-wrap: anywhere; }
+#page[dir="rtl"] * { letter-spacing: 0 !important; text-transform: none !important; }
+
+@media (max-width: 820px) {
+  body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .head { grid-template-columns: minmax(0, 1fr); }
+  body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .head h1, body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .head .lede, body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .head .head-curve { grid-column: 1; }
+  body:is([data-page="work"], [data-page="contact"], [data-page="blog"]) .orb { grid-column: 1; grid-row: auto; justify-self: end; }
+  body[data-page="blog"] .orb { margin-inline-end: 0; }
+  body[data-page="blog"] .head .head-curve { display: none; }
+  .sec { padding: 36px 0; }
+  .post-row.has-pic a { grid-template-columns: 1fr 72px; }
+  .post-row.has-pic a .date { grid-column: 1 / -1; }
+  .work-pic, .post-cover { border-radius: 16px; }
+}
+#page { overflow-x: clip; }
+@media (max-width: 820px) {
+  body:is([data-page="contact"], [data-page="blog"]) .orb { width: 140px; margin: 0 16px 20px; }
+  body[data-page="work"] .orb { width: 220px; margin: 0 16px 20px; }
+}
+.work .meta { white-space: normal; overflow-wrap: anywhere; max-width: 28ch; }

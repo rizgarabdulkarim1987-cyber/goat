@@ -9,13 +9,14 @@ page.append(pageHead(t("nav.work", "work"), t("ui.work.lede", "selected projects
 
 mount(list, async () => {
   const works = await api("/api/work");
+  if (!works.length) return h("div", { class: "state" }, h("p", { class: "state-title" }, t("ui.work.empty", "no projects here yet. check back soon.")));
   const ALL = "*all";
   const cats = [ALL, ...new Set(works.map((w) => w.category))];
   let cat = ALL;
   const ul = h("ul", { class: "works" });
   const rows = works.map((w, i) => {
     const more = h("div", { class: "more", id: `more-${w.slug}` }, h("div", null, h("div", { class: "inner" }, h("span"),
-      h("div", null, h("p", { class: "p" }, w.body), h("ul", { class: "chips" }, w.tags.map((t) => h("li", { class: "chip" }, t)))))));
+      h("div", null, w.image ? h("img", { class: "work-pic", src: w.image, alt: "", loading: "lazy", decoding: "async" }) : null, h("p", { class: "p" }, w.body), h("ul", { class: "chips" }, w.tags.map((t) => h("li", { class: "chip" }, t)))))));
     const btn = h("button", { type: "button", "aria-expanded": "false", "aria-controls": more.id },
       h("span", { class: "no" }, String(i + 1).padStart(2, "0")),
       h("span", null, h("span", { class: "t" }, w.title), h("span", { class: "p muted", style: "display:block;margin-top:10px" }, w.summary)),
