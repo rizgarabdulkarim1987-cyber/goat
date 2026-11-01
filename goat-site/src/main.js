@@ -844,7 +844,7 @@ if (lenis && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
   });
   gsap.ticker.add((time, ms) => {
     if (!playing) return;
-    const max = document.documentElement.scrollHeight - innerHeight, y = Math.min(max, scrollY + (PX_PER_SECOND / settings.speed) * (ms / 1000));
+    const max = document.documentElement.scrollHeight - innerHeight, y = Math.min(max, scrollY + 2 * (PX_PER_SECOND / settings.speed) * (ms / 1000));
     lenis.scrollTo(y, { immediate: true, force: true });
     if (y >= max - 1) set(false);
   });
