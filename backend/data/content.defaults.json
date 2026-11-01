@@ -104,6 +104,8 @@
     "ui.st.nf": "not found",
     "ui.st.nfText": "this page does not exist.",
     "ui.menu": "menu",
-    "ui.language": "language"
+    "ui.language": "language",
+    "ui.work.empty": "no projects here yet. check back soon.",
+    "ui.blog.empty": "no posts yet. check back soon."
   }
 }

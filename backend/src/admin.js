@@ -49,9 +49,11 @@ export function mountAdmin(app, { DATA, readJson, writeJson, admin, wrap, origin
   const contentFile = (lang, defaults) => `content${defaults ? ".defaults" : ""}${lang === "en" ? "" : `.${lang}`}.json`;
   const readTexts = async (lang, defaults) => {
     const en = (await readJson(contentFile("en", defaults))).texts;
-    if (lang === "en") return en;
+    // words added by a newer deploy show up before anyone has edited them: the shipped defaults sit underneath the edited ones
+    const base = defaults ? {} : await readTexts(lang, true);
+    if (lang === "en") return { ...base, ...en };
     const other = await readJson(contentFile(lang, defaults)).catch((err) => { if (err.code === "ENOENT") return { texts: {} }; throw err; });
-    return { ...en, ...other.texts };
+    return { ...en, ...base, ...other.texts };
   };
   app.get("/api/content", wrap(async (req, res) => {
     const lang = langOf(req);
