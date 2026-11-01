@@ -161,6 +161,32 @@ function dot(size, color = "#000", o = {}) {
   return el;
 }
 
+// A backend frame is drawn on a canvas that masks itself to the disc. The disc is not left to CSS
+// (border-radius + overflow hidden around a composited, scaled canvas): some GPUs clip that with a coarse
+// polygon, which cuts chords off the circle and lets the frame's black corners cover the lines behind it.
+function discCanvas(m, lite = 1, round = true) {
+  const cv = document.createElement("canvas");
+  cv.width = Math.round(m.cell[0] * lite); cv.height = Math.round(m.cell[1] * lite);
+  cv.style.cssText = "display:block;width:100%;height:100%";
+  const g = cv.getContext("2d");
+  g.imageSmoothingQuality = "high";
+  const r = Math.min(cv.width, cv.height) / 2 - 1; // a hair inside the cell: the crop's anti-aliased rim stays out
+  let shown = null;
+  // draws `img` (or, until the first frame arrives, a plain `fill`) once per change
+  const paint = (img, fill) => {
+    const key = img || fill;
+    if (!key || key === shown) return;
+    g.clearRect(0, 0, cv.width, cv.height);
+    g.save();
+    if (round) { g.beginPath(); g.arc(cv.width / 2, cv.height / 2, r, 0, Math.PI * 2); g.clip(); }
+    if (img) g.drawImage(img, 0, 0, cv.width, cv.height);
+    else { g.fillStyle = fill; g.fillRect(0, 0, cv.width, cv.height); }
+    g.restore();
+    shown = key;
+  };
+  return { cv, paint };
+}
+
 // a clip baked from the reference by bake.py: a sprite sheet whose frame is
 // picked from the timeline clock, moved along the same path it was cropped on
 function clip(name, o = {}) {
@@ -176,16 +202,11 @@ function clip(name, o = {}) {
     draw = () => {};
   } else if (m.frameSet) {
     // frames served one by one by the backend: drawn on a canvas, so a frame swap never flickers
-    const cv = document.createElement("canvas");
     const lite = matchMedia("(max-width: 820px)").matches ? 0.5 : 1; // a phone gets half-size canvases: a quarter of the memory
-    cv.width = Math.round(m.cell[0] * lite); cv.height = Math.round(m.cell[1] * lite);
-    cv.style.cssText = "display:block;width:100%;height:100%";
-    el.style.overflow = "hidden";
-    el.appendChild(cv);
-    const g = cv.getContext("2d");
-    g.imageSmoothingQuality = "high";
-    let shown = null;
-    draw = (i) => { const img = m.frameSet.best(i); if (img && img !== shown) { g.clearRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height); shown = img; } };
+    const disc = discCanvas(m, lite, m.round);
+    el.classList.remove("round"); // the canvas carries its own round mask; no CSS clipping on this element
+    el.appendChild(disc.cv);
+    draw = (i) => disc.paint(m.frameSet.best(i));
     m.frameSet.onLoad((i) => { if (i === Math.round(st.f)) paint(); });
   } else {
     Object.assign(el.style, { backgroundImage: `url(${m.src})`, backgroundSize: `${m.cols * m.w}px ${m.rows * m.h}px` });
@@ -633,15 +654,12 @@ let canNo = 0;
 const can = () => {
   const n = ++canNo, m = SEQ[`can${n}`];
   if (!m?.frameSet) return circleImg(`can${n}`, "/img/can.png", 480, { layer: gWork });
-  const el = circleImg(`can${n}`, "", 480, { layer: gWork, fill: "#000" });
-  const cv = document.createElement("canvas");
-  cv.width = m.cell[0]; cv.height = m.cell[1];
-  cv.style.cssText = "display:block;width:100%;height:100%";
-  el.appendChild(cv);
-  const g = cv.getContext("2d");
-  g.imageSmoothingQuality = "high";
-  let shown = null, cur = 0;
-  const paint = () => { const img = m.frameSet.best(cur); if (img && img !== shown) { g.clearRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height); shown = img; } };
+  const el = circleImg(`can${n}`, "", 480, { layer: gWork, fill: "transparent" });
+  Object.assign(el.style, { borderRadius: "0", overflow: "visible" }); // the canvas masks itself to the disc (see discCanvas)
+  const disc = discCanvas(m);
+  el.appendChild(disc.cv);
+  let cur = 0;
+  const paint = () => disc.paint(m.frameSet.best(cur), "#000"); // a black disc until the first frame arrives
   m.frameSet.onLoad((i) => { if (i === cur) paint(); });
   paint();
   if (m.n > 1) {
@@ -803,6 +821,33 @@ if (lenis) {
   lenis.on("scroll", ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
+}
+
+// One scroll is enough: the first scroll down (wheel, swipe or a key) sets the page playing on its own at the clip's own pace, to the end.
+// A scroll back up, a touch of the screen, Escape or the pause button hands it back; the button starts it again from where it is.
+if (lenis && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  let playing = false, armed = true;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.setAttribute("aria-label", "play or pause the page");
+  btn.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:70;padding:9px 18px;font:inherit;font-size:14px;color:#fff;background:#ea1a0c;border:0;cursor:pointer";
+  const set = (on) => { playing = on; armed = !on; btn.textContent = on ? "pause" : "play"; btn.setAttribute("aria-pressed", String(on)); };
+  set(false);
+  btn.addEventListener("click", () => set(!playing));
+  document.body.append(btn);
+  addEventListener("wheel", (e) => { if (e.deltaY > 0 && armed) set(true); else if (e.deltaY < 0 && playing) set(false); }, { passive: true });
+  addEventListener("touchstart", () => { if (playing) set(false); }, { passive: true });
+  addEventListener("touchmove", () => { if (armed) { armed = false; setTimeout(() => !playing && set(true), 250); } }, { passive: true });
+  addEventListener("keydown", (e) => {
+    if (["ArrowDown", "PageDown", " "].includes(e.key) && armed && !(e.target instanceof HTMLButtonElement)) set(true);
+    else if (["ArrowUp", "PageUp", "Home", "Escape"].includes(e.key) && playing) set(false);
+  });
+  gsap.ticker.add((time, ms) => {
+    if (!playing) return;
+    const max = document.documentElement.scrollHeight - innerHeight, y = Math.min(max, scrollY + (PX_PER_SECOND / settings.speed) * (ms / 1000));
+    lenis.scrollTo(y, { immediate: true, force: true });
+    if (y >= max - 1) set(false);
+  });
 }
 
 // seek helper for testing: ?t=24 jumps to 24s of the video clock
