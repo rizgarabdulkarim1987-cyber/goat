@@ -273,6 +273,8 @@ function cover(side, b) {
   };
   c.size();
   gsap.set(el, { y: side === "top" ? DESIGN_H + 10 : -h - 10, opacity: 0 });
+  if (OFF.has("fill")) fill.style.display = "none";
+  if (OFF.has("arc")) el.style.visibility = "hidden";
   layers.domes.append(fill, el);
   covers.push(c);
   c.sync();
