@@ -240,4 +240,4 @@ await mount(root, async () => {
   return h("div", { class: "about" }, s1, s2, s3, s4, s5, s6, s7, s8, s9, s9b, s10, s11, s12);
 });
 
-aboutScroll(page, rtl, t);
+aboutScroll(page, rtl);

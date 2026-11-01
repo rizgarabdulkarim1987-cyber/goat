@@ -9,15 +9,14 @@ gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 // scroll. Words slide in and drift away, circles come into focus and grow, hairlines draw and are erased again, highlighter
 // bars fill, the hill rises and its years pop up, the numbers roll. Nothing splits text, so Arabic and Kurdish stay joined.
 // Reduced motion gets the plain page; a phone gets one simple rise per element.
-export function aboutScroll(page, rtl, t = (k, d) => d) {
+export function aboutScroll(page, rtl) {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const phone = matchMedia("(max-width: 820px)").matches;
   ScrollTrigger.config({ ignoreMobileResize: true });
   const $$ = (sel, root = page) => [...root.querySelectorAll(sel)];
 
-  let lenis = null;
   if (!phone) {
-    lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
+    const lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
     lenis.on("scroll", ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -29,8 +28,6 @@ export function aboutScroll(page, rtl, t = (k, d) => d) {
   bar.setAttribute("aria-hidden", "true");
   document.body.append(bar);
   gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
-
-  autoplay(lenis, t);
 
   const start = rtl ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)";
 
@@ -139,35 +136,5 @@ function countUp(page, $$) {
     const o = { v: 0 };
     el.textContent = "0";
     gsap.to(o, { v: to, ease: "none", onUpdate: () => { el.textContent = String(Math.round(o.v)); }, scrollTrigger: { trigger: el, start: "top 95%", end: "top 60%", scrub: 0.6 } });
-  });
-}
-
-// One scroll is enough: the first scroll down (wheel, swipe or a key) sets the page walking on its own, scene after scene, to the end.
-// A scroll back up, a touch of the screen or the pause button hands the page back; the button starts it again from where it is.
-function autoplay(lenis, t) {
-  const SPEED = 120; // design pixels of scroll per second
-  let playing = false, armed = true;
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "auto-btn";
-  const label = () => { btn.textContent = playing ? t("about.auto.pause", "pause") : t("about.auto.play", "play"); btn.setAttribute("aria-pressed", String(playing)); };
-  const set = (on) => { playing = on; armed = !on; label(); };
-  label();
-  btn.addEventListener("click", () => set(!playing));
-  document.body.append(btn);
-
-  addEventListener("wheel", (e) => { if (e.deltaY > 0 && armed) set(true); else if (e.deltaY < 0 && playing) set(false); }, { passive: true });
-  addEventListener("touchstart", () => { if (playing) set(false); }, { passive: true });
-  addEventListener("touchmove", () => { if (armed) { armed = false; setTimeout(() => !playing && set(true), 250); } }, { passive: true });
-  addEventListener("keydown", (e) => {
-    if (["ArrowDown", "PageDown", " "].includes(e.key) && armed && !(e.target instanceof HTMLButtonElement)) set(true);
-    else if (["ArrowUp", "PageUp", "Home", "Escape"].includes(e.key) && playing) set(false);
-  });
-
-  gsap.ticker.add((time, ms) => {
-    if (!playing) return;
-    const max = document.documentElement.scrollHeight - innerHeight, y = Math.min(max, scrollY + SPEED * (ms / 1000));
-    if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
-    if (y >= max - 1) set(false);
   });
 }

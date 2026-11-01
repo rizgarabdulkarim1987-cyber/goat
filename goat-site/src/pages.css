@@ -334,9 +334,6 @@ body[data-page="blog"] .head .head-curve path { stroke: #000; }
 .work .meta { white-space: normal; overflow-wrap: anywhere; max-width: 28ch; }
 
 /* about: the red line along the bottom that the scroll draws */
-/* about: pause / play for the self-walking page */
-.auto-btn { position: fixed; right: 18px; bottom: 18px; z-index: 61; padding: 9px 18px; font: inherit; font-size: 14px; color: #fff; background: #ea1a0c; border: 0; cursor: pointer; }
-.auto-btn:hover { background: #fff; color: #000; box-shadow: inset 0 0 0 1px #000; }
 .scroll-bar { position: fixed; left: 0; right: 0; bottom: 0; height: 3px; background: var(--red); transform-origin: 0 50%; z-index: 60; pointer-events: none; }
 html[data-lang="ar"] .scroll-bar, html[data-lang="ckb"] .scroll-bar { transform-origin: 100% 50%; }
 
