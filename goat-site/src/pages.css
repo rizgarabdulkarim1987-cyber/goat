@@ -361,10 +361,10 @@ body[data-page="about"] #ui a[aria-current="page"] { text-decoration: none; back
 /* words: the small light ones scattered over the scene, and the big heavy titles */
 .fw { font-size: calc(var(--fs, 34) * var(--cu)); font-weight: 300; line-height: 1; white-space: nowrap; }
 .fw.bold { font-weight: 900; }
-.v, .vt, .vp, .fname, .yr { writing-mode: vertical-rl; }
+.v, .vt, .vp, .fname.v, .yr { writing-mode: vertical-rl; }
 .vt { font-weight: 900; line-height: 1; font-size: calc(118 * var(--cu)); letter-spacing: -.01em; text-transform: lowercase; }
 .t5 { font-size: calc(96 * var(--cu)); }
-.vp { font-size: calc(17 * var(--cu)); line-height: 1.5; font-weight: 300; height: calc(360 * var(--cu)); max-width: none; }
+.vp { font-size: calc(17 * var(--cu)); line-height: 1.5; font-weight: 300; height: calc(340 * var(--cu)); max-width: none; }
 .mid-title { width: 100%; text-align: center; font-weight: 900; font-size: calc(120 * var(--cu)); line-height: 1; text-transform: lowercase; }
 .place { font-weight: 900; font-size: calc(84 * var(--cu)); line-height: 1; white-space: nowrap; }
 .climb-title { font-weight: 900; font-size: calc(120 * var(--cu)); line-height: 1; z-index: 3; }
@@ -403,10 +403,11 @@ html[data-lang="ar"] .hl, html[data-lang="ckb"] .hl { background-position: 100% 
 
 /* the founders: a glow, a ring and the name */
 .founder { display: grid; place-items: center; width: calc(200 * var(--cu)); aspect-ratio: 1; }
-.founder .orbit { position: absolute; width: 38%; aspect-ratio: 1; border-radius: 50%; border: 1px solid #111; }
+.founder .orbit { position: absolute; width: calc(var(--o) * var(--cu)); aspect-ratio: 1; border-radius: 50%; border: 1px solid #111; }
 .founder::before { content: ""; position: absolute; inset: -30%; border-radius: 50%; filter: blur(calc(34 * var(--cu))); opacity: .55; z-index: -1; }
 .glow-red::before { background: #ff6a5a; }
 .glow-purple::before { background: #8d6bff; }
+.glow-yellow::before { background: #e6ff2e; }
 .fname { font-size: calc(30 * var(--cu)); font-weight: 400; position: relative; }
 
 /* buttons: the little red and black pills of the design */

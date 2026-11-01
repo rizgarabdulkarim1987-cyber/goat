@@ -68,15 +68,15 @@ await mount(root, async () => {
     hairs("M -20 760 C 300 640 560 820 880 700 S 1300 560 1460 640")));
 
   // 4 / two wild goats: the founders, from the team list
-  const names = team.slice(0, 2);
-  const glow = ["red", "purple"];
-  const nameAt = [[210, 130], [960, 200]];
+  const names = team.slice(0, 3);
+  // as in the design: the first name sits horizontally by the logo, the other two stand upright beside a ring
+  const spots = [{ x: 90, y: 70, glow: "red", ring: 0, v: false }, { x: 1000, y: 190, glow: "purple", ring: 165, v: true }, { x: 390, y: 600, glow: "yellow", ring: 40, v: true }];
   const s4 = scene("s4", stage(
-    h("h2", { class: "mid-title", "data-m": "title", style: at(0, 440) }, t("about.s4.title", "two wild goats")),
-    h("p", { class: "vp", "data-m": "word", style: at(540, 40) }, t("about.s4.p1", "")),
-    h("p", { class: "vp", "data-m": "word", style: at(780, 560) }, t("about.s4.p2", "")),
-    names.map((m, i) => h("span", { class: `founder glow-${glow[i]}`, "data-m": "word", style: at(nameAt[i][0], nameAt[i][1]) }, h("span", { class: "orbit" }), h("span", { class: "fname v" }, m.name))),
-    hairs("M 330 230 C 200 330 120 520 220 640 S 520 860 780 820", "M 1060 200 C 980 380 1180 500 1300 640 S 1100 880 800 840")));
+    h("h2", { class: "mid-title", "data-m": "title", style: at(0, 400) }, t("about.s4.title", "three wild goats")),
+    h("p", { class: "vp", "data-m": "word", style: at(440, 30) }, t("about.s4.p1", "")),
+    h("p", { class: "vp", "data-m": "word", style: at(700, 545) }, t("about.s4.p2", "")),
+    names.map((m, i) => h("span", { class: `founder glow-${spots[i].glow}`, "data-m": "word", style: at(spots[i].x, spots[i].y, `;--o:${spots[i].ring}`) }, spots[i].ring ? h("span", { class: "orbit" }) : null, h("span", { class: `fname${spots[i].v ? " v" : ""}` }, m.name))),
+    hairs("M 150 150 C 330 250 300 520 90 600 S -60 540 -20 480", "M 1060 250 C 960 420 1060 640 1300 700 S 1480 640 1460 620", "M 420 640 C 450 760 700 840 1000 760 S 1300 640 1460 700")));
 
   // 5 / they climbed (photograph of the founders)
   const s5 = scene("s5 photo", photo("aboutFounders"), stage(

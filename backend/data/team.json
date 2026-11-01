@@ -8,5 +8,10 @@
     "id": "faris",
     "name": "Faris",
     "role": "design lead"
+  },
+  {
+    "id": "jano",
+    "name": "Jano",
+    "role": "motion and 3D"
   }
 ]
