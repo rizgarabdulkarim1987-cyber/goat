@@ -473,6 +473,7 @@ html[data-lang="ar"] .clients li, html[data-lang="ckb"] .clients li { letter-spa
   /* the top bar is white on the about page: its links must be dark (on desktop they are white over the blend) */
   body[data-page="about"] #ui { color: #111; }
   body[data-page="about"] #ui a[aria-current="page"] { background: #111; color: #fff; }
+  body[data-page="about"] #ui .logo img { filter: invert(1); }
   .scene.curve { margin-top: -5vw; }
   .flow { padding: 6vw 0; }
   .s9b .team { gap: 16px; }
