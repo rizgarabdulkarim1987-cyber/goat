@@ -1,32 +1,12 @@
 [
   {
-    "id": "rizgar",
-    "name": "Rizgar",
+    "id": "faruq",
+    "name": "Faruq",
     "role": "المؤسس، الإدارة الإبداعية"
   },
   {
-    "id": "lana",
-    "name": "Lana",
-    "role": "قائدة التصميم"
-  },
-  {
-    "id": "aras",
-    "name": "Aras",
-    "role": "الحركة والثلاثي الأبعاد"
-  },
-  {
-    "id": "shno",
-    "name": "Shno",
-    "role": "الاستراتيجية والنصوص"
-  },
-  {
-    "id": "dilan",
-    "name": "Dilan",
-    "role": "مونتاج الأفلام"
-  },
-  {
-    "id": "hawre",
-    "name": "Hawre",
-    "role": "تطوير الويب"
+    "id": "faris",
+    "name": "Faris",
+    "role": "قائد التصميم"
   }
 ]

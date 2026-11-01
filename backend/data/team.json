@@ -1,32 +1,12 @@
 [
   {
-    "id": "rizgar",
-    "name": "Rizgar",
+    "id": "faruq",
+    "name": "Faruq",
     "role": "founder, creative direction"
   },
   {
-    "id": "lana",
-    "name": "Lana",
+    "id": "faris",
+    "name": "Faris",
     "role": "design lead"
-  },
-  {
-    "id": "aras",
-    "name": "Aras",
-    "role": "motion and 3D"
-  },
-  {
-    "id": "shno",
-    "name": "Shno",
-    "role": "strategy and copy"
-  },
-  {
-    "id": "dilan",
-    "name": "Dilan",
-    "role": "film editor"
-  },
-  {
-    "id": "hawre",
-    "name": "Hawre",
-    "role": "web development"
   }
 ]
