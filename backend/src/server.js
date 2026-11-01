@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { readFile, writeFile, rename } from "node:fs/promises";
+import { appendFile, readFile, writeFile, rename } from "node:fs/promises";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -83,14 +83,17 @@ app.get("/api", (req, res) => res.json({
 }));
 app.get("/api/health", (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
-// a phone's ?diag read-out, beaconed every half second: the last lines are kept in memory so a crash on a phone can be read from here
-const diag = [];
+// a phone's ?diag read-out, beaconed every half second: appended to a file in the data folder (a deploy restarts the
+// process, so memory alone lost the runs), and the last 400 lines can be read from here
+const DIAG_LOG = path.join(DATA, "diag.log");
 app.post("/api/diag", express.text({ limit: "2kb", type: "*/*" }), (req, res) => {
-  diag.push(`${new Date().toISOString().slice(11, 19)} ${String(req.body).slice(0, 300)}`);
-  if (diag.length > 400) diag.splice(0, diag.length - 400);
+  appendFile(DIAG_LOG, `${new Date().toISOString().slice(11, 19)} ${String(req.body).slice(0, 300)}\n`).catch(() => {});
   res.status(204).end();
 });
-app.get("/api/diag", (req, res) => res.type("text/plain").send(diag.join("\n")));
+app.get("/api/diag", wrap(async (req, res) => {
+  const text = await readFile(DIAG_LOG, "utf8").catch(() => "");
+  res.type("text/plain").send(text.split("\n").slice(-400).join("\n"));
+}));
 
 /* ---------- circle frame sequences ---------- */
 // frames live in data/frames/<clip>/0000.jpg ...; clips.json holds the metadata bake.py wrote.
