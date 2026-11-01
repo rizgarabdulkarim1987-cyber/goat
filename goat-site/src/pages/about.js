@@ -184,11 +184,13 @@ await mount(root, async () => {
   // 10 / three voices scattered over the stage, the word "testimonials" broken up behind them
   // each voice: a picture, the name and role, the words and (vertical) the company; voices 2 and 3 are right-aligned
   const voice = (n, [px, py, d], [nx, ny], [qx, qy], [lx, ly], right = false) => {
+    // right-aligned words stop 20px short of their picture
+    const rw = right ? `;--w:${px - 20 - nx}` : "";
     const co = t(`about.s10.co${n}`, n === "" ? "nahj al-iraq" : "");
     return [
       circ(pic("aboutQuote"), px, py, d, "gray"),
-      h("div", { class: `q-name${right ? " r" : ""}`, "data-m": "word", style: at(nx, ny) }, h("strong", null, t(`about.s10.name${n}`, t("about.s10.name", "Ali Shawkat"))), h("span", null, t(`about.s10.role${n}`, t("about.s10.role", "marketing manager")))),
-      h("blockquote", { class: `q-text${right ? " r" : ""}`, "data-m": "word", style: at(qx, qy) }, t(`about.s10.quote${n}`, t("about.s10.quote", ""))),
+      h("div", { class: `q-name${right ? " r" : ""}`, "data-m": "word", style: at(nx, ny, rw) }, h("strong", null, t(`about.s10.name${n}`, t("about.s10.name", "Ali Shawkat"))), h("span", null, t(`about.s10.role${n}`, t("about.s10.role", "marketing manager")))),
+      h("blockquote", { class: `q-text${right ? " r" : ""}`, "data-m": "word", style: at(qx, qy, rw) }, t(`about.s10.quote${n}`, t("about.s10.quote", ""))),
       co ? h("span", { class: "fw v up q-co", "data-m": "word", style: at(lx, ly) }, co) : null];
   };
   const s10 = scene("s10 dark", stage(
