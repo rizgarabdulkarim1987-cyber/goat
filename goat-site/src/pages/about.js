@@ -1,14 +1,15 @@
 import { api } from "../api.js";
-import { t } from "../lang.js";
+import { t, rtl } from "../lang.js";
 import { loadCounters } from "../clips.js";
 import { h, vlabel, mount } from "./dom.js";
 import { mountShell, pageHead, homeLink } from "./shell.js";
+import { aboutScroll } from "./about-scroll.js";
 
 const page = mountShell("about", { theme: "dark" });
 const body = h("div");
 page.append(pageHead(t("nav.about", "about")), body, homeLink());
 
-mount(body, async () => {
+await mount(body, async () => {
   const [about, counters] = await Promise.all([api("/api/about"), loadCounters()]);
   // every second section is a white band across the page, like the long About strip in the design file
   let n = 0;
@@ -23,3 +24,4 @@ mount(body, async () => {
     counters && sec(t("ui.about.numbers", "numbers"), h("ul", { class: "stats" }, [["Prject", "projects"], ["client", "clients"], ["staff", "staff"], ["years", "years"]]
       .map(([k, cap]) => h("li", null, h("span", { class: "num" }, String(counters[k])), h("span", { class: "cap" }, t(`ui.stat.${cap}`, cap)))))));
 });
+aboutScroll(page, rtl);
