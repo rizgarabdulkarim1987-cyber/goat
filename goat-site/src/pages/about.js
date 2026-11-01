@@ -37,6 +37,11 @@ const ln = (x, y, w, hh, { rev = false, from } = {}) => {
   const x1 = x + w, y1 = y + hh, a = rev ? y : y1, b = rev ? y1 : y, [sx, sy] = from || [x, a];
   return `M ${sx} ${sy} C ${x + w * .45} ${a}, ${x + w * .3} ${b}, ${x + w * .62} ${a + (b - a) * .68} S ${x1 - w * .05} ${b}, ${x1} ${b}`;
 };
+// rail() is a hairline with a black dot that rides it as it draws (the scroll script pairs the first dots with the first paths)
+const rail = (x, y, w, hh, opts = {}, d = 14) => {
+  const rev = !!opts.rev, [sx, sy] = opts.from || [x, rev ? y : y + hh];
+  return { path: ln(x, y, w, hh, opts), dot: dot(sx - d / 2, sy - d / 2, d) };
+};
 const hairs = (...paths) => {
   const svg = document.createElementNS(SVG, "svg");
   svg.setAttribute("class", "hairs");
@@ -67,12 +72,13 @@ await mount(root, async () => {
   const avatar = (m) => h("span", { class: "avatar", "aria-hidden": "true" }, m.photo ? h("img", { src: m.photo, alt: "", loading: "lazy", decoding: "async" }) : Array.from(m.name)[0]);
 
   // 1 / creativity
+  const rails1 = [rail(0, 516, 1181, 305), rail(0, 700, 665, 496)];
   const s1 = scene("s1", stage(
     h("h1", { class: "vt t1", "data-m": "title", style: at(626, 195) }, t("about.s1.title", "creativity")),
     circ(pic("aboutHero"), 720, 202, 396),
     fw("about.s1.w1", "belongs", 316, 219), fw("about.s1.w2", "higher", 457, 499, { v: true }),
     fw("about.s1.w3", "on", 1192, 291, { v: true }), fw("about.s1.w4", "grounds", 982, 682),
-    hairs(ln(0, 516, 1181, 305), ln(0, 700, 665, 496))));
+    rails1[0].dot, rails1[1].dot, hairs(rails1[0].path, rails1[1].path)));
 
   // 2 / we do dare
   const s2 = scene("s2", stage(
@@ -82,6 +88,7 @@ await mount(root, async () => {
     dot(982, 229, 79), dot(326, 460, 53), ring(195, 901, 131),
     hairs(ln(1054, 160, 391, 157, { from: [1021, 268] }), "M 352 486 C 330 520, 290 530, 240 545 S 90 545, -6 589")));
 
+  const rails3 = [rail(-106, 232, 1094, 346), rail(349, 549, 1091, 346, { rev: true })];
   // 3 / goat, the greatest of all time (a photograph, the word on top of it)
   const s3 = scene("s3 photo curve", photo("aboutOffice"), stage(
     h("span", { class: "giant", "data-m": "giant", style: at(442, 291) }, "goat"),
@@ -89,8 +96,9 @@ await mount(root, async () => {
     fw("about.s3.g2", "of all time", 792, 623, { v: true, cls: "bold", size: 40 }), fw("about.s3.w2", "are", 1139, 730, { v: true }),
     par(875, 618, 246, "cap", mark("about.s3.caphl", "A kick-ass creative agency", "red"), " ", mark("about.s3.cap", "based in Sulaymaniyah, Iraq. Dreaming big and making waves since 2020.", "black")),
     ring(988, 181, 132), ring(305, 711, 54),
-    hairs(ln(-106, 232, 1094, 346), ln(349, 549, 1091, 346, { rev: true }))));
+    rails3[0].dot, rails3[1].dot, hairs(rails3[0].path, rails3[1].path)));
 
+  const rails4 = [rail(-21, 210, 365, 480, { rev: true }), rail(953, 337, 499, 444), rail(461, 708, 981, 208, { rev: true })];
   // 4 / three wild goats: the founders, from the team list. No photograph here, as in the design
   const names = team.slice(0, 3).map((m) => m.name);
   const nm = (i, def) => names[i] || def;
@@ -103,7 +111,7 @@ await mount(root, async () => {
     h("span", { class: "fw v up", "data-m": "word", style: at(404, 642) }, nm(2, "jano")),
     ring(83, 161, 93, "glow g-red"), ring(65, 124, 104), ring(994, 215, 163, "glow g-purple"), ring(1009, 184, 157),
     ring(392, 709, 52, "glow g-yellow"), ring(431, 696, 53),
-    hairs(ln(-21, 210, 365, 480, { rev: true }), ln(953, 337, 499, 444), ln(461, 708, 981, 208, { rev: true }))));
+    rails4[0].dot, rails4[1].dot, rails4[2].dot, hairs(rails4[0].path, rails4[1].path, rails4[2].path)));
 
   // 5 / they climbed (photograph of the founders): the title is two words, each in its own column
   const tw = t("about.s5.title", "they climbed").split(/\s+/);
@@ -181,6 +189,7 @@ await mount(root, async () => {
     clients.length ? h("ul", { class: "clients", "aria-label": t("about.s10.title", "trusted by"), "data-m": "team" }, clients.map((c, i) => h("li", { style: at(...spot(i)) }, c))) : null),
   h("div", { class: "flow", id: "the-team" }, team.length ? h("ul", { class: "team", "data-m": "team" }, team.map((m) => h("li", null, avatar(m), h("span", { class: "name" }, m.name), h("span", { class: "small muted" }, m.role)))) : null));
 
+  const rails10 = [rail(-8, 89, 374, 413, { rev: true }), rail(1082, 520, 415, 339), rail(676, 711, 765, 135, { rev: true })];
   // 10 / three voices scattered over the stage, the word "testimonials" broken up behind them
   // each voice: a picture, the name and role, the words and (vertical) the company; voices 2 and 3 are right-aligned
   const voice = (n, [px, py, d], [nx, ny], [qx, qy], [lx, ly], right = false) => {
@@ -198,7 +207,7 @@ await mount(root, async () => {
     voice("", [326, 52, 210], [536, -13], [536, 62], [459, -11]),
     voice("2", [982, 261, 263], [628, 307], [629, 382], [1218, 270], true),
     voice("3", [536, 640, 183], [187, 562], [188, 637], [655, 556], true),
-    hairs(ln(-8, 89, 374, 413, { rev: true }), ln(1082, 520, 415, 339), ln(676, 711, 765, 135, { rev: true }))));
+    rails10[0].dot, rails10[1].dot, rails10[2].dot, hairs(rails10[0].path, rails10[1].path, rails10[2].path)));
 
   // 11 / ready to climb with us
   const s11 = scene("s11 cap", stage(

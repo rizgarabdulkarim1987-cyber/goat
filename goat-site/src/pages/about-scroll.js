@@ -60,13 +60,13 @@ export function aboutScroll(page, rtl) {
     // floating words: slide in from below, hold, then drift upward away; vertical ones come from the side
     parts('[data-m="word"]').forEach((el, i) => {
       const vertical = el.classList.contains("v") || el.classList.contains("vp");
-      into(el, { opacity: 0, y: vertical ? 40 : 24 }, { opacity: 1, y: 0 }, 0.02 + i * 0.035, 0.14);
-      away(el, { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -40 - (i % 3) * 20 }, 0.2 + i * 0.03, 0.5);
+      into(el, { opacity: 0, y: vertical ? 90 : 60 }, { opacity: 1, y: 0 }, 0.02 + i * 0.035, 0.14);
+      away(el, { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -90 - (i % 3) * 40 }, 0.2 + i * 0.03, 0.5);
     });
 
     // circles come into focus from a blur and grow; they keep growing a little with the scroll
     parts('[data-m="circ"]').forEach((el, i) => {
-      into(el, { scale: 0.55, opacity: 0, filter: "blur(14px)" }, { scale: 1, opacity: 1, filter: "blur(0px)" }, 0.02 + i * 0.05, 0.22);
+      into(el, { scale: 0.4, opacity: 0, filter: "blur(18px)" }, { scale: 1, opacity: 1, filter: "blur(0px)" }, 0.02 + i * 0.05, 0.26);
       away(el, { scale: 1, opacity: 1 }, { scale: 1.06, opacity: 0 }, 0.24 + i * 0.05, 0.5);
       // the picture inside settles from a close-up while the circle opens, then drifts the other way
       const img = el.querySelector("img");
@@ -85,7 +85,7 @@ export function aboutScroll(page, rtl) {
       if (!path) {
         into(el, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)" }, 0.08 + i * 0.04, 0.12);
       } else {
-        const t0 = first ? 0.2 + i * 0.2 : 0.05 + i * 0.06, dur = first ? 1.6 : 0.4;
+        const t0 = first ? 0.2 + i * 0.2 : 0.05 + i * 0.06, dur = first ? 2.4 : 0.6;
         const ride = { motionPath: { path, align: path, alignOrigin: [0.5, 0.5], start: 0, end: 1 }, duration: dur };
         if (first) { intro.set(el, { motionPath: { ...ride.motionPath, end: 0 }, opacity: 1 }, t0); intro.to(el, ride, t0); }
         else { tl.set(el, { motionPath: { ...ride.motionPath, end: 0 }, opacity: 1 }, t0); tl.to(el, ride, t0); }
@@ -102,7 +102,7 @@ export function aboutScroll(page, rtl) {
     paths.forEach((p, i) => {
       const len = p.getTotalLength();
       gsap.set(p, { strokeDasharray: `${len} ${len * 4}`, strokeDashoffset: len });
-      if (first) intro.to(p, { strokeDashoffset: 0, duration: 1.6 }, 0.2 + i * 0.2); else tl.to(p, { strokeDashoffset: 0, duration: 0.4 }, 0.05 + i * 0.06);
+      if (first) intro.to(p, { strokeDashoffset: 0, duration: 2.4 }, 0.2 + i * 0.2); else tl.to(p, { strokeDashoffset: 0, duration: 0.6 }, 0.05 + i * 0.06);
       tl.to(p, { opacity: 0, duration: 0.25 }, rest + 0.05 + i * 0.02);
     });
 
