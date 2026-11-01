@@ -104,7 +104,7 @@ await mount(root, async () => {
     svg.setAttribute("viewBox", "0 0 1438 960");
     svg.setAttribute("preserveAspectRatio", "none");
     svg.setAttribute("aria-hidden", "true");
-    for (const [fill, d] of [["#d4d4d4", "M 0 700 C 220 640 380 700 620 640 S 900 430 1120 420 S 1340 260 1438 200 L 1438 960 L 0 960 Z"], ["#9a9a9a", "M 0 770 C 220 720 420 790 640 700 S 940 500 1160 470 S 1340 340 1438 290 L 1438 960 L 0 960 Z"], ["#000", "M 0 820 C 200 780 420 820 660 740 S 960 560 1180 520 S 1340 420 1438 370 L 1438 960 L 0 960 Z"]]) {
+    for (const [fill, d] of [["#d4d4d4", "M -2400 700 L 0 700 C 220 640 380 700 620 640 S 900 430 1120 420 S 1340 260 1438 200 L 3838 200 L 3838 960 L -2400 960 Z"], ["#9a9a9a", "M -2400 770 L 0 770 C 220 720 420 790 640 700 S 940 500 1160 470 S 1340 340 1438 290 L 3838 290 L 3838 960 L -2400 960 Z"], ["#000", "M -2400 820 L 0 820 C 200 780 420 820 660 740 S 960 560 1180 520 S 1340 420 1438 370 L 3838 370 L 3838 960 L -2400 960 Z"]]) {
       const p = document.createElementNS(SVG, "path"); p.setAttribute("d", d); p.setAttribute("fill", fill); svg.append(p);
     }
     return svg;
