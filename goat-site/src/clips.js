@@ -6,15 +6,18 @@ import { setContent } from "./lang.js";
    so the timeline never changes; only the way a frame is drawn does. If the backend does not answer,
    or a clip's first frame cannot be fetched, that clip keeps its static sprite sheet from /public/seq. */
 
-const BACKEND = ["leapA", "cheer", "leapB", "plant", "eye", "hero1", "hero2", "can1", "can2", "can3", "can4"]; // can1..can4: the four circles of the work scene
-const SHEETS = ["goat", "hillrise"]; // baked sprite sheets: the picture comes from the backend too (the headline words hero1/hero2 are frames at twice the size)
+const BACKEND = ["leapA", "cheer", "leapB", "plant", "eye", "hero1", "hero2", "hillrise", "goat", "can1", "can2", "can3", "can4"]; // can1..can4: the four circles of the work scene
+const SHEETS = ["goat", "hillrise"]; // a clip the backend still holds as a sprite sheet (older data folders): the sheet is used as the picture
 const PARALLEL = 8;
 
 // Only a few frames of a clip are kept decoded at once: all of them together are over a gigabyte of pixels,
 // which a phone cannot hold (the tab is killed). The ones near the current frame stay; the browser's own cache
 // keeps the files, so a frame that was dropped comes back quickly.
 const LITE = matchMedia("(max-width: 820px)").matches;
-const KEEP = LITE ? 6 : 10;
+// the frames are every frame of the video (60 a second), so a scroll flick crosses dozens of them: a wide window
+// stays decoded around the current one and the next ones are asked for ahead of the scroll
+const KEEP = LITE ? 16 : 72;
+const AHEAD = LITE ? [1, 2, 3, 4, -1] : [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, -1, -2, -4, -8];
 // On a phone a frame is decoded as an ImageBitmap at half size and closed when it is dropped: iOS keeps the pixels of
 // an <img> in its own cache after src is cleared, so dropping those never gave the memory back and the tab was killed.
 const BITMAPS = LITE && typeof createImageBitmap === "function";
@@ -43,6 +46,7 @@ function makeFrames(meta, keepAll = false) {
         .then((bmp) => { if (images[i] !== entry) { bmp.close(); return false; } entry.img = bmp; return arrived(); }, failed);
     } else {
       const img = new Image();
+      img.crossOrigin = "anonymous"; // the page reads the frame's pixels (to find the disc's edge): a frame from another origin must come with CORS, or the canvas is tainted
       entry.img = img;
       entry.done = new Promise((resolve) => { img.onload = () => resolve(arrived()); img.onerror = () => resolve(failed()); });
       img.src = meta.frames[i];
@@ -56,7 +60,7 @@ function makeFrames(meta, keepAll = false) {
     best(i) {
       cur = i;
       load(i);
-      if (!keepAll) for (const d of LITE ? [1, 2] : [1, 2, 3, -1]) if (i + d >= 0 && i + d < meta.n) load(i + d);
+      if (!keepAll) for (const d of AHEAD) if (i + d >= 0 && i + d < meta.n) load(i + d);
       if (images[i]?.ok) return images[i].img;
       for (let k = i - 1; k >= 0; k--) if (images[k]?.ok) return images[k].img;
       for (let k = i + 1; k < meta.n; k++) if (images[k]?.ok) return images[k].img;
@@ -74,6 +78,23 @@ function streamAll(clips) {
   return Promise.all(Array.from({ length: PARALLEL }, worker));
 }
 
+// On a desktop every frame file is pulled into the browser's cache in the background, in page order, a few at a
+// time and only while the network is otherwise idle: a frame the scroll reaches is then decoded from the cache
+// instead of waiting for the host. Nothing is decoded here, so it costs no memory. A phone does not do this.
+function warmCache(clips) {
+  if (LITE || !("fetch" in window)) return;
+  const urls = clips.flatMap((c) => c.frames);
+  let next = 0;
+  const idle = (f) => ("requestIdleCallback" in window ? requestIdleCallback(f, { timeout: 1500 }) : setTimeout(f, 50));
+  const worker = async () => {
+    while (next < urls.length) {
+      const url = urls[next++];
+      try { await fetch(url, { priority: "low", cache: "force-cache" }); } catch { /* the scroll's own request will retry it */ }
+    }
+  };
+  idle(() => { for (let k = 0; k < 3; k++) worker(); });
+}
+
 /** Merge the backend's clips over the static metadata. Resolves with { SEQ, loaded } where `loaded`
  *  resolves once every frame has been requested (the page does not wait for it unless asked to). */
 export async function loadSeq(staticSeq, { all = false } = {}) {
@@ -81,7 +102,7 @@ export async function loadSeq(staticSeq, { all = false } = {}) {
   let remote;
   try { remote = await api("/api/clips"); } catch { return { SEQ, loaded: Promise.resolve(), source: "static" }; }
   const used = [];
-  await Promise.all(BACKEND.filter((n) => remote[n]).map(async (name) => {
+  await Promise.all(BACKEND.filter((n) => remote[n]?.frames).map(async (name) => {
     const meta = remote[name];
     const frameSet = makeFrames(meta, all);
     // the first frame decides whether this clip can come from the backend at all
@@ -97,6 +118,7 @@ export async function loadSeq(staticSeq, { all = false } = {}) {
     img.src = remote[name].src;
   })));
   const ordered = used.sort((a, b) => a.t0 - b.t0);
+  if (!all) warmCache(ordered);
   return { SEQ, loaded: all ? streamAll(ordered) : Promise.resolve(), source: used.length ? "backend" : "static" };
 }
 

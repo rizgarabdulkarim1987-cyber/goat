@@ -164,13 +164,39 @@ function dot(size, color = "#000", o = {}) {
 // A backend frame is drawn on a canvas that masks itself to the disc. The disc is not left to CSS
 // (border-radius + overflow hidden around a composited, scaled canvas): some GPUs clip that with a coarse
 // polygon, which cuts chords off the circle and lets the frame's black corners cover the lines behind it.
-function discCanvas(m, lite = 1, round = true) {
+// The disc inside a baked tile is a little smaller than the cell: the crop ran past the disc's edge, and the
+// video's own lines are burnt into that rim, so a mask at the cell's edge showed a copy of a line in front of
+// the page's line and hid the page's line under the rim's black. The disc's radius is read off every frame
+// (from the edge inwards, at 64 angles; the 75th percentile ignores the angles where dark content touches the
+// edge) and the mask ends where the disc does.
+const probe = document.createElement("canvas");
+probe.width = probe.height = 160;
+const probeG = probe.getContext("2d", { willReadFrequently: true });
+function discRadius(img) {
+  const N = probe.width, c = N / 2;
+  probeG.drawImage(img, 0, 0, N, N);
+  const d = probeG.getImageData(0, 0, N, N).data;
+  const lum = (x, y) => { const k = (y * N + x) * 4; return d[k] * 0.3 + d[k + 1] * 0.59 + d[k + 2] * 0.11; };
+  const bg = [lum(1, 1), lum(N - 2, 1), lum(1, N - 2), lum(N - 2, N - 2)].sort((a, b) => a - b)[1];
+  const rs = [];
+  for (let a = 0; a < 64; a++) {
+    const ca = Math.cos(a * Math.PI / 32), sa = Math.sin(a * Math.PI / 32);
+    let r = c - 1;
+    while (r > c * 0.6 && Math.abs(lum(Math.round(c + ca * r), Math.round(c + sa * r)) - bg) <= 40) r--;
+    rs.push(r);
+  }
+  rs.sort((a, b) => a - b);
+  const r = rs[Math.floor(rs.length * 0.75)];
+  return r <= c * 0.6 + 1 ? 1 : r / c; // 0..1 of the half-cell; no edge found (a blank or blurred tile): the whole cell
+}
+
+function discCanvas(m, lite = 1, round = true, fit = false) {
   const cv = document.createElement("canvas");
   cv.width = Math.round(m.cell[0] * lite); cv.height = Math.round(m.cell[1] * lite);
   cv.style.cssText = "display:block;width:100%;height:100%";
   const g = cv.getContext("2d");
   g.imageSmoothingQuality = "high";
-  const r = Math.min(cv.width, cv.height) / 2 - 1; // a hair inside the cell: the crop's anti-aliased rim stays out
+  const half = Math.min(cv.width, cv.height) / 2;
   let shown = null;
   // draws `img` (or, until the first frame arrives, a plain `fill`) once per change
   const paint = (img, fill) => {
@@ -178,7 +204,12 @@ function discCanvas(m, lite = 1, round = true) {
     if (!key || key === shown) return;
     g.clearRect(0, 0, cv.width, cv.height);
     g.save();
-    if (round) { g.beginPath(); g.arc(cv.width / 2, cv.height / 2, r, 0, Math.PI * 2); g.clip(); }
+    if (round) {
+      let ratio = 1;
+      if (fit && img) { try { ratio = discRadius(img); } catch { ratio = 1; } } // a frame without CORS taints the probe: the whole cell is shown
+      const r = ratio * half - 1; // a hair inside the disc: its anti-aliased rim stays out
+      g.beginPath(); g.arc(cv.width / 2, cv.height / 2, r, 0, Math.PI * 2); g.clip();
+    }
     if (img) g.drawImage(img, 0, 0, cv.width, cv.height);
     else { g.fillStyle = fill; g.fillRect(0, 0, cv.width, cv.height); }
     g.restore();
@@ -203,7 +234,7 @@ function clip(name, o = {}) {
   } else if (m.frameSet) {
     // frames served one by one by the backend: drawn on a canvas, so a frame swap never flickers
     const lite = matchMedia("(max-width: 820px)").matches ? 0.5 : 1; // a phone gets half-size canvases: a quarter of the memory
-    const disc = discCanvas(m, lite, m.round);
+    const disc = discCanvas(m, lite, m.round, true);
     el.classList.remove("round"); // the canvas carries its own round mask; no CSS clipping on this element
     el.appendChild(disc.cv);
     draw = (i) => disc.paint(m.frameSet.best(i));
