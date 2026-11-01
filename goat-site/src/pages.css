@@ -338,7 +338,7 @@ body[data-page="blog"] .head .head-curve path { stroke: #000; }
 html[data-lang="ar"] .scroll-bar, html[data-lang="ckb"] .scroll-bar { transform-origin: 100% 50%; }
 
 /* ======== about: the design file's scenes. Every scene is a 1438 x 960 stage (design pixels times --cu); a phone gets a flowing column ======== */
-body[data-page="about"] { background: #fff; color: #111; }
+body[data-page="about"] { background: #fff; color: #231f20; }
 body[data-page="about"] .swoosh { display: none; }
 body[data-page="about"] #page { padding: 0; min-height: 0; overflow-x: clip; }
 body[data-page="about"] #page > * { max-width: none; }
@@ -346,122 +346,123 @@ body[data-page="about"] #page > * { max-width: none; }
 @media (min-width: 821px) { body[data-page="about"] #frame { mix-blend-mode: difference; } }
 body[data-page="about"] #ui { color: #fff; }
 body[data-page="about"] #ui a[aria-current="page"] { text-decoration: none; background: #fff; color: #000; padding: 2px 8px; }
-.about { --ink: #111; }
+.about { --ink: #231f20; }
 .scene { position: relative; overflow: hidden; background: #fff; color: var(--ink); }
 .scene.dark { background: #000; color: #fff; --ink-soft: #9a9a9a; --line: #333; }
 .scene.curve { border-radius: 50% 50% 0 0 / 5vw 5vw 0 0; margin-top: -5vw; padding-top: 5vw; position: relative; z-index: 2; }
-.stage { position: relative; width: calc(1438 * var(--cu)); height: calc(960 * var(--cu)); margin-inline: auto; }
+/* the sixth scene lets its last picture hang down over the seventh */
+.scene.spill { overflow: visible; z-index: 3; }
+.stage { position: relative; width: calc(1438 * var(--cu)); height: calc(var(--sh, 960) * var(--cu)); margin-inline: auto; }
 .stage > * { position: absolute; left: calc(var(--x, 0) * var(--cu)); top: calc(var(--y, 0) * var(--cu)); margin: 0; }
 .stage > .hairs, .stage > .hill { left: 0; top: 0; }
-.stage > .mid-title { left: 0; }
 .hairs, .hill { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-.hairs path { fill: none; stroke: #8a8a8a; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.hairs path { fill: none; stroke: #a7a5a6; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .scene.dark .hairs path, .photo .hairs path { stroke: rgba(255, 255, 255, .6); }
 
-/* words: the small light ones scattered over the scene, and the big heavy titles */
-.fw { font-size: calc(var(--fs, 34) * var(--cu)); font-weight: 300; line-height: 1; white-space: nowrap; }
-.fw.bold { font-weight: 900; }
-.v, .vt, .vp, .fname.v, .yr { writing-mode: vertical-rl; }
-.vt { font-weight: 900; line-height: 1; font-size: calc(118 * var(--cu)); letter-spacing: -.01em; text-transform: lowercase; }
-.t5 { font-size: calc(118 * var(--cu)); }
-.vp { font-size: calc(17 * var(--cu)); line-height: 1.5; font-weight: 300; height: calc(340 * var(--cu)); max-width: none; }
-.mid-title { width: 100%; text-align: center; font-weight: 900; font-size: calc(120 * var(--cu)); line-height: 1; text-transform: lowercase; }
-.place { font-weight: 900; font-size: calc(100 * var(--cu)); line-height: 1; white-space: nowrap; z-index: 2; }
-.climb-title { font-weight: 900; font-size: calc(120 * var(--cu)); line-height: 1; z-index: 3; }
-.herd-title { font-weight: 900; font-size: calc(110 * var(--cu)); line-height: 1; color: #fff; }
-.giant { font-weight: 900; font-size: calc(330 * var(--cu)); line-height: .9; color: #fff; text-transform: lowercase; white-space: nowrap; }
-.giant.ink { color: var(--ink); font-size: calc(250 * var(--cu)); }
-/* the faint giant words behind a scene ("culture", "the team", "testimonials" broken up) */
-/* faint through the colour, not opacity: the scroll tweens opacity to 1 on every word */
-.giant.faint { color: rgba(0, 0, 0, .07); font-size: calc(300 * var(--cu)); z-index: 0; pointer-events: none; }
-.scene.dark .giant.faint { color: rgba(255, 255, 255, .08); }
-.giant.faint.v { writing-mode: vertical-rl; }
-.giant.faint.up { transform: rotate(180deg); }
-.s9 .giant.faint { font-size: calc(200 * var(--cu)); }
-.s9 .giant.faint.v { font-size: calc(250 * var(--cu)); }
-.s10 .giant.faint { font-size: calc(170 * var(--cu)); }
-.s4 .mid-title { font-size: calc(95 * var(--cu)); }
-/* a white scene that starts under the black curve of the one before it */
-.scene.cap::before { content: ""; position: absolute; left: -10vw; right: -10vw; top: -8vw; height: 14vw; background: #000; border-radius: 0 0 50% 50% / 0 0 100% 100%; z-index: 1; }
-.small-p, .caption, .col { font-size: calc(17 * var(--cu)); line-height: 1.3; font-weight: 300; width: calc(330 * var(--cu)); }
-.caption { width: calc(280 * var(--cu)); color: #fff; font-size: calc(15 * var(--cu)); }
-.caption.wide { width: calc(300 * var(--cu)); font-size: calc(17 * var(--cu)); }
-.col { width: calc(200 * var(--cu)); z-index: 3; }
-.scene.dark .small-p { color: #ddd; }
-.s9 .small-p { width: calc(280 * var(--cu)); }
-.s11 .small-p { width: calc(420 * var(--cu)); }
+/* words: the light ones scattered over the scene (36), the bold titles (96, 128) and the giant ones (256).
+   "rot -90" in the design reads top to bottom (.v); "rot 90" reads bottom to top (.v.up), which keeps its box where it was */
+.fw { font-size: calc(var(--fs, 36) * var(--cu)); font-weight: 300; line-height: 1.47; white-space: nowrap; }
+.fw.bold { font-weight: 700; }
+.v, .vt, .giant.faint.v, .yr { writing-mode: vertical-rl; }
+.v.up, .giant.faint.v.up { transform: rotate(180deg); }
+.vt { font-weight: 700; line-height: 1.47; font-size: calc(128 * var(--cu)); text-transform: lowercase; white-space: nowrap; color: #231f20; }
+.vt.t5 { font-size: calc(96 * var(--cu)); }
+.sec { font-weight: 700; font-size: calc(96 * var(--cu)); line-height: 1.47; white-space: nowrap; color: #1e1e1e; text-transform: lowercase; }
+.sec.white { color: #fff; }
+.sec.l1, .sec.l2, .col { z-index: 2; }
+.giant { font-weight: 900; font-size: calc(256 * var(--cu)); line-height: 1.465; color: #fff; text-transform: lowercase; white-space: nowrap; }
+.giant.ink { color: #1e1e1e; }
+/* the faint giant words behind a scene ("culture", "the team"), faint through the colour because the scroll tweens opacity to 1 on every word */
+.giant.faint { font-weight: 700; font-size: calc(128 * var(--cu)); line-height: 1.47; color: rgba(211, 210, 210, .5); z-index: 0; pointer-events: none; }
+.scene.dark .giant.faint { color: rgba(79, 76, 77, .5); }
+/* paragraphs: 16px, in a column as wide as the design draws it */
+.par { width: calc(var(--w) * var(--cu)); font-size: calc(16 * var(--cu)); line-height: 1.45; font-weight: 400; }
+.par.ink { color: #231f20; }
+.par.cap { color: #fff; }
+.photo { color: #fff; }
 
 /* highlighter bars painted behind a phrase; the scroll fills them */
-.hl { --w: 100%; --c: #ea1a0c; color: inherit; background: linear-gradient(var(--c), var(--c)) no-repeat 0 78% / var(--w) 78%; padding: 0 .12em; }
-html[data-lang="ar"] .hl, html[data-lang="ckb"] .hl { background-position: 100% 78%; }
+.hl { --w: 100%; --c: #ea1a0c; color: inherit; background: linear-gradient(var(--c), var(--c)) no-repeat 0 60% / var(--w) 74%; padding: 0 .12em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+html[data-lang="ar"] .hl, html[data-lang="ckb"] .hl { background-position: 100% 60%; }
 .hl-red { --c: #ea1a0c; color: #fff; }
-.hl-blue { --c: #4d1bff; color: #fff; }
-.hl-yellow { --c: #e6ff2e; color: #111; }
+.hl-black { --c: #000; color: #fff; }
+.hl-blue { --c: #4800ff; color: #fff; }
+.hl-yellow { --c: #e5ff21; color: #231f20; }
 .statement .hl { display: inline-block; }
 
 /* circles: a photograph in a ring, or the black one that holds the statement */
 .circ { width: calc(var(--d) * var(--cu)); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #ddd; }
 .circ img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .circ.gray img { filter: grayscale(1); }
-.dark-circ { background: #1a1a1a; display: grid; place-items: center; text-align: center; color: #fff; }
-.statement { font-size: calc(20 * var(--cu)); line-height: 1.35; font-weight: 300; max-width: calc(300 * var(--cu)); }
-.dot { width: calc(var(--d) * var(--cu)); aspect-ratio: 1; border-radius: 50%; background: #111; }
-.dot.blurred { filter: blur(calc(6 * var(--cu))); }
-.ring { width: calc(var(--d) * var(--cu)); aspect-ratio: 1; border-radius: 50%; border: 1px solid currentColor; opacity: .7; }
+.dark-circ { background: #231f20; color: #fff; }
+.statement { position: absolute; left: calc(118 * var(--cu)); top: calc(210 * var(--cu)); width: calc(288 * var(--cu)); margin: 0; text-align: center; font-size: calc(24 * var(--cu)); line-height: 1.47; font-weight: 300; }
+.dot { width: calc(var(--d) * var(--cu)); aspect-ratio: 1; border-radius: 50%; background: #231f20; }
+.ring { width: calc(var(--d) * var(--cu)); aspect-ratio: 1; border-radius: 50%; border: 1px solid #a7a5a6; opacity: 1; box-sizing: border-box; }
+.s3 .ring, .s5 .ring, .s9 .ring { border-color: rgba(255, 255, 255, .7); }
+.s4 .ring { border-color: #231f20; }
+.s9b .ring, .s12 .ring { border-color: #4f4c4d; }
+.ring.glow { border: 0; }
+.g-red { background: rgba(234, 26, 12, .5); }
+.g-purple { background: rgba(72, 0, 255, .3); }
+.g-yellow { background: #e5ff21; }
 
 /* a photograph behind a scene, in black and white */
 .photo .bg { position: absolute; inset: 0; background: #222; }
 .photo .bg img { width: 100%; height: 118%; object-fit: cover; filter: grayscale(1) contrast(1.05) brightness(.8); display: block; }
-.photo { color: #fff; }
 
-/* the founders: a glow, a ring and the name */
-.founder { display: grid; place-items: center; width: calc(200 * var(--cu)); aspect-ratio: 1; }
-.founder .orbit { position: absolute; width: calc(var(--o) * var(--cu)); aspect-ratio: 1; border-radius: 50%; border: 1px solid #111; }
-.founder::before { content: ""; position: absolute; inset: -30%; border-radius: 50%; filter: blur(calc(34 * var(--cu))); opacity: .55; z-index: -1; }
-.glow-red::before { background: #ff6a5a; }
-.glow-purple::before { background: #8d6bff; }
-.glow-yellow::before { background: #e6ff2e; }
-.fname { font-size: calc(30 * var(--cu)); font-weight: 400; position: relative; }
-
-/* buttons: the little red and black pills of the design */
-.btn-red, .btn-ink { display: inline-block; font-size: calc(16 * var(--cu)); padding: .55em 1.3em; color: #fff; background: #ea1a0c; text-decoration: none; white-space: nowrap; }
-.btn-ink { background: #111; }
+/* buttons: the little red and black rectangles of the design, 40 tall */
+.btn-red, .btn-ink { display: inline-grid; place-items: center; width: calc(var(--w) * var(--cu)); height: calc(40 * var(--cu)); font-size: calc(16 * var(--cu)); color: #fff; background: #ea1a0c; text-decoration: none; white-space: nowrap; }
+.btn-ink { background: #231f20; }
 .btn-red:hover { background: #fff; color: #000; }
 .btn-ink:hover { background: #ea1a0c; }
 
-/* the climb: a hill with years climbing it */
-.stop { display: flex; flex-direction: column; align-items: center; gap: calc(6 * var(--cu)); color: #fff; transform: translateX(-50%); }
-.stop .pt { width: calc(12 * var(--cu)); aspect-ratio: 1; border-radius: 50%; background: #fff; border: calc(3 * var(--cu)) solid #333; }
-.stop .tick { width: 1px; height: calc(34 * var(--cu)); background: #fff; opacity: .8; }
-.yr { font-size: calc(15 * var(--cu)); font-weight: 300; }
+/* the climb: a hill with years climbing it. Each stop is a 16px dot, a 22px tick and the year standing under it */
+.stop { width: calc(16 * var(--cu)); height: calc(16 * var(--cu)); color: #fff; }
+.stop .pt { position: absolute; inset: 0; border-radius: 50%; background: #000; border: calc(2 * var(--cu)) solid #fff; box-sizing: border-box; }
+.stop .tick { position: absolute; left: calc(8.5 * var(--cu)); top: calc(16 * var(--cu)); width: 1px; height: calc(22 * var(--cu)); background: #fff; }
+.stop .yr { position: absolute; left: calc(-3 * var(--cu)); top: calc(58 * var(--cu)); font-size: calc(14 * var(--cu)); font-weight: 300; line-height: 1.47; white-space: nowrap; }
 
-/* scenes that grow with their content instead of sitting on the stage */
-.flow { width: min(calc(1100 * var(--cu)), 100% - 32px); margin-inline: auto; padding: calc(100 * var(--cu)) 0; display: grid; gap: calc(60 * var(--cu)); justify-items: center; text-align: center; }
-.flow .mid-title { position: static; }
-.big { font-size: calc(110 * var(--cu)); }
+/* climbed with us: the paragraph lies on its side, the clients are grey wordmarks on a grid, the team follows */
+.vcols { writing-mode: vertical-rl; width: calc(552 * var(--cu)); height: calc(122 * var(--cu)); font-size: calc(16 * var(--cu)); line-height: 1.45; font-weight: 400; color: #fff; }
+.clients { list-style: none; padding: 0; }
+.clients li, .stats li, .fcol { position: absolute; left: calc(var(--x, 0) * var(--cu)); top: calc(var(--y, 0) * var(--cu)); }
+.clients li { max-width: calc(240 * var(--cu)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; font-size: calc(15 * var(--cu)); line-height: 1; color: #4f4c4d; letter-spacing: .06em; text-transform: uppercase; }
+html[data-lang="ar"] .clients li, html[data-lang="ckb"] .clients li { letter-spacing: 0; }
+.flow { width: min(calc(1100 * var(--cu)), 100% - 32px); margin-inline: auto; padding: calc(40 * var(--cu)) 0 calc(100 * var(--cu)); display: grid; gap: calc(60 * var(--cu)); justify-items: center; text-align: center; }
+.flow:empty { padding: 0; }
 .s9b .team { width: 100%; justify-content: center; text-align: center; }
 .s9b .team li { justify-items: center; }
-/* the paragraph standing in vertical columns under "climbed with us", read column by column as in the design */
-.vcols { writing-mode: vertical-rl; height: calc(300 * var(--cu)); font-size: calc(15 * var(--cu)); line-height: 1.6; font-weight: 300; color: #ccc; column-gap: 0; }
-.clients { list-style: none; display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(50 * var(--cu)) calc(30 * var(--cu)); width: 100%; font-weight: 900; font-size: clamp(14px, calc(22 * var(--cu)), 26px); color: #555; letter-spacing: .14em; text-transform: uppercase; }
-/* the voices: a small face and the words beside it, scattered over the stage */
-.quote { display: grid; grid-template-columns: auto 1fr; gap: calc(24 * var(--cu)); align-items: start; text-align: start; width: calc(560 * var(--cu)); }
-.quote.flip { grid-template-columns: 1fr auto; text-align: end; }
-.quote.flip .q-pic { order: 2; }
-.quote .circ { position: static; }
-.q-name { display: block; font-size: clamp(20px, calc(26 * var(--cu)), 30px); }
-.q-role { display: block; font-weight: 700; margin-bottom: 8px; }
-.q-text { font-weight: 300; color: #aaa; font-size: clamp(14px, calc(17 * var(--cu)), 19px); line-height: 1.35; margin: 0; }
-.hire { font-weight: 400; font-size: clamp(26px, calc(46 * var(--cu)), 60px); line-height: 1.1; }
-.sub { color: #aaa; max-width: 34em; font-weight: 300; }
-.end .stats { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(20 * var(--cu)); list-style: none; text-align: center; }
-.end .stats .num { display: block; font-weight: 900; font-size: clamp(44px, calc(72 * var(--cu)), 96px); line-height: 1; color: #ddd; }
-.end .stats .cap { color: var(--ink-soft); font-weight: 300; }
-.foot-links { display: flex; gap: calc(40 * var(--cu)); flex-wrap: wrap; justify-content: center; padding-top: calc(30 * var(--cu)); border-top: 1px solid var(--line); width: 100%; font-weight: 300; }
-.foot-links a { color: inherit; }
-.end { padding-bottom: calc(80 * var(--cu)); padding-top: calc(60 * var(--cu)); }
-/* the green magnet sits on the top edge of the last scene, half over the white one before it */
-.magnet { width: calc(180 * var(--cu)); height: auto; margin-top: calc(-150 * var(--cu)); position: relative; z-index: 3; }
+
+/* the voices: picture, name and role, the words, and the company standing beside them */
+.q-name, .q-text { width: calc(382 * var(--cu)); font-size: calc(16 * var(--cu)); line-height: 1.45; font-weight: 400; margin: 0; text-align: left; }
+.q-name { color: #fff; }
+.q-name strong, .q-name span { display: block; font-weight: 400; }
+.q-text { color: #7b7979; }
+.q-name.r, .q-text.r { text-align: right; }
+.q-co { color: #4f4c4d; }
+
+/* the last scene: white on top, the black ground (curved top edge) from y 276 */
+.scene.s12 { background: #fff; }
+.s12 .ground { position: absolute; left: 0; right: 0; top: calc(276 * var(--cu)); bottom: 0; background: #000; border-radius: 50% 50% 0 0 / calc(70 * var(--cu)) calc(70 * var(--cu)) 0 0; }
+.magnet { width: calc(272 * var(--cu)); height: auto; }
+.hire { width: calc(1051 * var(--cu)); text-align: center; font-weight: 300; font-size: calc(36 * var(--cu)); line-height: 1.47; color: #d3d2d2; }
+.sub { width: calc(1051 * var(--cu)); text-align: center; font-weight: 400; font-size: calc(16 * var(--cu)); line-height: 1.45; color: #4f4c4d; }
+.stats { list-style: none; padding: 0; }
+.stats li { width: calc(163 * var(--cu)); height: calc(141 * var(--cu)); }
+.stats .cap { position: absolute; left: 0; top: 0; width: calc(35 * var(--cu)); font-size: calc(24 * var(--cu)); font-weight: 300; line-height: 1.47; color: #4f4c4d; white-space: nowrap; }
+.stats .num { position: absolute; left: calc(51 * var(--cu)); top: 0; font-size: calc(96 * var(--cu)); font-weight: 700; line-height: 1.47; color: #d3d2d2; white-space: nowrap; }
+.rule { width: calc(1051 * var(--cu)); height: 0; border: 0; border-top: 1px solid #231f20; }
+.fcol { width: calc(220 * var(--cu)); height: calc(120 * var(--cu)); }
+.flabel { position: absolute; left: 0; top: 0; width: calc(35 * var(--cu)); writing-mode: vertical-rl; transform: rotate(180deg); font-size: calc(24 * var(--cu)); font-weight: 300; line-height: 1.47; color: #4f4c4d; white-space: nowrap; }
+.flinks a { position: absolute; left: calc((51 + var(--c) * 87) * var(--cu)); top: calc(var(--r) * 33 * var(--cu)); max-width: calc(84 * var(--cu)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(14 * var(--cu)); font-weight: 300; line-height: 1.47; color: #a7a5a6; }
+.flabel:hover, .flinks a:hover { color: #fff; }
+.flogo { display: flex; align-items: center; gap: calc(6 * var(--cu)); }
+.flogo img:first-child { width: calc(30 * var(--cu)); height: calc(30 * var(--cu)); }
+.flogo img:last-child { height: calc(16 * var(--cu)); width: auto; }
+.copy { width: calc(1051 * var(--cu)); text-align: center; font-size: calc(10 * var(--cu)); font-weight: 300; line-height: 1.47; color: #7b7979; }
+
+/* a white scene that starts under the black curve of the one before it (a cap 181 tall, arched like the design's) */
+.scene.cap::before { content: ""; position: absolute; left: 50%; transform: translateX(-50%); top: 0; width: calc(3193 * var(--cu)); height: calc(181 * var(--cu)); background: #000; border-radius: 0 0 50% 50% / 0 0 100% 100%; z-index: 1; }
 
 /* phones: the stage is a column; the vertical words lie down, the scattered words become a row */
 @media (max-width: 820px) {
@@ -469,32 +470,44 @@ html[data-lang="ar"] .hl, html[data-lang="ckb"] .hl { background-position: 100% 
   .stage > * { position: static; }
   .stage > .hairs, .stage > .hill { display: none; }
   .scene.curve { border-radius: 50% 50% 0 0 / 28px 28px 0 0; margin-top: -28px; padding-top: 28px; }
-  .v, .vt, .vp, .fname, .yr { writing-mode: horizontal-tb; }
-  .vt, .mid-title, .place, .climb-title, .herd-title { font-size: clamp(48px, 17vw, 96px); flex: 0 0 100%; text-align: start; width: auto; }
+  .scene.spill { overflow: hidden; }
+  .v, .vt, .giant.faint.v, .yr, .vcols, .flabel { writing-mode: horizontal-tb; }
+  .v.up, .giant.faint.v.up, .flabel { transform: none; }
+  .vt, .sec, .vt.t5 { font-size: clamp(48px, 17vw, 96px); flex: 0 0 100%; text-align: start; width: auto; white-space: normal; }
   .giant, .giant.ink { font-size: clamp(88px, 34vw, 190px); flex: 0 0 100%; }
-  .t5 { font-size: clamp(44px, 15vw, 84px); }
-  .fw { font-size: clamp(20px, 6vw, 28px); }
-  .vp, .small-p, .caption, .caption.wide, .col { flex: 0 0 100%; width: auto; height: auto; font-size: 16px; }
+  .fw, .fw.bold { font-size: clamp(20px, 6vw, 28px); }
+  .par, .vcols { flex: 0 0 100%; width: auto; height: auto; font-size: 16px; }
   .circ { flex: 0 0 auto; width: min(64vw, 280px); max-width: 100%; }
-  .dark-circ { width: min(86vw, 340px); padding: 24px; }
-  .statement { font-size: 18px; max-width: none; }
+  .dark-circ { width: min(86vw, 340px); padding: 24px; display: grid; place-items: center; }
+  .statement { position: static; width: auto; font-size: 18px; }
   .dot, .ring { display: none; }
-  .btn-red, .btn-ink { font-size: 16px; }
-  .founder { width: auto; aspect-ratio: auto; display: inline-flex; }
-  .founder::before, .founder .orbit { display: none; }
-  .fname { font-size: 26px; }
-  .stop { flex-direction: row; transform: none; flex: 0 0 auto; }
-  .stop .pt { width: 10px; }
-  .yr { font-size: 14px; }
-  .flow { padding: 56px 0; gap: 36px; }
-  .clients { grid-template-columns: 1fr 1fr; font-size: 15px; }
-  .quote, .quote.flip { grid-template-columns: 1fr; justify-items: center; text-align: center; width: auto; }
-  .quote .circ { width: 120px; }
-  .giant.faint, .scene.cap::before, .stop .tick { display: none; }
-  .vcols { writing-mode: horizontal-tb; height: auto; font-size: 16px; }
-  .clients { grid-template-columns: 1fr 1fr; }
-  .magnet { width: 120px; margin-top: -90px; }
-  .end .stats { grid-template-columns: 1fr 1fr; gap: 24px; }
-  .hire { font-size: 28px; }
+  .btn-red, .btn-ink { width: auto; padding: 0 28px; font-size: 16px; }
+  .stop { width: auto; height: auto; display: flex; align-items: center; gap: 8px; color: #231f20; }
+  .stop .pt { position: static; width: 10px; height: 10px; background: #231f20; border-color: #231f20; flex: none; }
+  .stop .yr { position: static; font-size: 14px; }
+  .stop .tick { display: none; }
+  .flow { padding: 40px 0; gap: 36px; }
+  .clients { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 0 0 100%; }
+  .clients li { position: static; max-width: none; font-size: 15px; }
+  .q-name, .q-text { width: auto; flex: 0 0 100%; font-size: 16px; }
+  .q-name.r, .q-text.r { text-align: left; }
+  .circ.gray { width: 120px; }
+  .giant.faint, .scene.cap::before { display: none; }
+  .scene.s12 { background: #000; color: #fff; }
+  .s12 .ground, .s12 .us { display: none; }
+  .magnet { width: 120px; }
+  .hire { width: auto; flex: 0 0 100%; font-size: 28px; text-align: start; }
+  .sub { width: auto; flex: 0 0 100%; text-align: start; }
+  .stats { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 0 0 100%; }
+  .stats li { position: static; width: auto; height: auto; display: flex; align-items: baseline; gap: 10px; }
+  .stats .cap, .stats .num { position: static; width: auto; }
+  .stats .num { font-size: 52px; }
+  .rule { width: 100%; }
+  .foot-links { display: flex; flex-wrap: wrap; gap: 18px 28px; flex: 0 0 100%; }
+  .fcol { position: static; width: auto; height: auto; }
+  .flabel { position: static; width: auto; font-size: 20px; display: block; }
+  .flinks { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .flinks a { position: static; }
+  .flogo, .copy { width: auto; flex: 0 0 100%; text-align: start; }
 }
 @media (prefers-reduced-motion: reduce) { .hl { --w: 100% !important; } }
